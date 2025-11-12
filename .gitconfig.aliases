@@ -1,0 +1,27 @@
+[alias]
+    # --- Basic Shortcuts ---
+    co = checkout
+    br = branch
+    cm = commit -m
+    st = status -sb
+
+    # --- Quick Commits ---
+    save = "!git add . && git commit -m"
+    undo = reset --soft HEAD~1
+
+    # --- Branch Management ---
+    newbranch = checkout -b
+    nb = "!f() { git checkout -b feature/$1; }; f"
+
+    # --- Logs & History ---
+    last = log -1 HEAD --stat
+    graph = log --oneline --graph --decorate --all
+
+    # --- Sync ---
+    sync = "!git pull && git push"
+
+    # --- Utilities ---
+    amend = commit --amend --no-edit
+    unstage = reset HEAD --
+    fixup = "!git add . && git commit --fixup=HEAD"
+    clean = "!git clean -fd && git reset --hard"
