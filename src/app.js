@@ -1,96 +1,92 @@
-// ----------------------------
-// Prompeii V4 - app.js
-// Vanilla JS + Supabase + Custom Toast
-// ----------------------------
+// ======================================================
+// Prompeii V4 — Phase 2 MVP App
+// Curated AI Prompt Browser
+// ======================================================
 
-// Import Supabase client
+// --- Imports ---
 import { createClient } from '@supabase/supabase-js';
+import { createPromptCard } from './components/PromptCard.js';
+import { getFavorites } from './utils/storage.js';
 
-// Initialize Supabase
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// --- Supabase Setup ---
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
-// ----------------------------
-// Toast Notification (no React)
-// ----------------------------
-function showToast(message) {
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = message;
-  document.body.appendChild(toast);
-
-  // fade in
-  setTimeout(() => toast.classList.add('visible'), 10);
-  // fade out
-  setTimeout(() => toast.classList.remove('visible'), 2000);
-  // remove from DOM
-  setTimeout(() => toast.remove(), 2500);
-}
-
-// ----------------------------
-// Prompt Card Class
-// ----------------------------
-class PromptCard {
-  constructor(prompt) {
-    this.prompt = prompt;
-  }
-
-  createElement() {
-    const div = document.createElement('div');
-    div.classList.add('prompt-card');
-
-    div.innerHTML = `
-      <h3>${this.prompt.smart_title || this.prompt.title}</h3>
-      <p>${this.prompt.intro || this.prompt.content}</p>
-      <button class="copy-button">Copy Prompt</button>
-    `;
-
-    const button = div.querySelector('.copy-button');
-    button.addEventListener('click', () => this.copyToClipboard());
-
-    return div;
-  }
-
-  copyToClipboard() {
-    const textToCopy = this.prompt.prompt || this.prompt.content;
-    if (!textToCopy) return;
-
-    navigator.clipboard.writeText(textToCopy)
-      .then(() => showToast('🔥 Prompt copied!'))
-      .catch(() => showToast('⚠️ Copy failed'));
-  }
-}
-
-// ----------------------------
-// Fetch + Render Prompts
-// ----------------------------
+// --- Load Prompts ---
 async function loadPrompts() {
+  try {
+    const { data, error } = await supabase
+      .from('prompts')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const app = document.getElementById('app');
+    if (!app) {
+      console.error('App container not found.');
+      return;
+    }
+
+    app.innerHTML = '';
+    data.forEach((prompt) => {
+      const card = createPromptCard(prompt);
+      app.appendChild(card);
+    });
+
+    console.log(`✅ Loaded ${data.length} prompts from Supabase`);
+  } catch (err) {
+    console.error('❌ Error loading prompts:', err.message);
+  }
+}
+
+// --- Load Favorites ---
+function loadFavorites() {
   const app = document.getElementById('app');
-  app.innerHTML = '<p>Loading prompts...</p>';
+  if (!app) return;
 
-  const { data: prompts, error } = await supabase
-    .from('prompts')
-    .select('*')
-    .limit(10);
-
-  if (error) {
-    console.error('Error fetching prompts:', error);
-    app.innerHTML = '<p>Failed to load prompts.</p>';
+  const favorites = getFavorites();
+  if (!favorites.length) {
+    app.innerHTML = `<p style="color:#aaa;text-align:center;">No favorites yet.</p>`;
     return;
   }
 
-  app.innerHTML = '';
-  prompts.forEach((prompt) => {
-    const card = new PromptCard(prompt);
-    app.appendChild(card.createElement());
+  app.innerHTML = `<h2 style="color:#fff;">Your Favorites</h2>`;
+  favorites.forEach(async (id) => {
+    const { data, error } = await supabase.from('prompts').select('*').eq('id', id).single();
+    if (!error && data) {
+      app.appendChild(createPromptCard(data));
+    }
   });
 }
 
-// ----------------------------
-// Run the App
-// ----------------------------
-document.addEventListener('DOMContentLoaded', () => {
-  loadPrompts();
-});
+// --- Navigation ---
+function setupNavigation() {
+  const discoverBtn = document.getElementById('nav-discover');
+  const favoritesBtn = document.getElementById('nav-favorites');
 
+  if (discoverBtn)
+    discoverBtn.addEventListener('click', () => {
+      setActiveNav(discoverBtn);
+      loadPrompts();
+    });
+
+  if (favoritesBtn)
+    favoritesBtn.addEventListener('click', () => {
+      setActiveNav(favoritesBtn);
+      loadFavorites();
+    });
+}
+
+function setActiveNav(activeBtn) {
+  document.querySelectorAll('.nav-btn').forEach((btn) => btn.classList.remove('active'));
+  activeBtn.classList.add('active');
+}
+
+// --- Initialize ---
+document.addEventListener('DOMContentLoaded', () => {
+  setupNavigation();
+  loadPrompts(); // Default view
+});

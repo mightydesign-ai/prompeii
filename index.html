@@ -3,23 +3,48 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Prompeii — Curated AI Prompts</title>
-    <link rel="stylesheet" href="/src/style.css" />
-    <!-- (Optional) remove favicon line for now to avoid 404 -->
-    <!-- <link rel="icon" type="image/png" href="/favicon.png" /> -->
+    <title>Prompeii — Where Great Prompts Erupt</title>
+
+    <!-- SEO Meta -->
+    <meta name="description" content="Prompeii — The curated AI prompt companion for creators, designers, and developers." />
+    <meta name="theme-color" content="#111111" />
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="./style.css" />
   </head>
+
   <body>
+    <!-- 🌋 Header -->
     <header>
-      <h1>Prompeii</h1>
-      <p>Where great prompts erupt.</p>
+      <h1 class="logo">Prompeii</h1>
+      <p class="tagline">Where great prompts erupt.</p>
     </header>
 
-    <main>
-      <!-- 🔥 THIS MUST EXIST -->
-      <div id="app"></div>
+    <!-- 🔍 Navigation -->
+    <nav id="nav">
+      <button id="nav-discover" class="nav-btn active">Discover</button>
+      <button id="nav-favorites" class="nav-btn">Favorites</button>
+    </nav>
+
+    <!-- 🧭 Main App Container -->
+    <main id="app">
+      <p style="color:#888; text-align:center; margin-top:2rem;">Loading curated prompts...</p>
     </main>
 
-    <!-- Load after #app so the element exists -->
-    <script type="module" src="/src/app.js"></script>
+    <!-- ⚡ Footer -->
+    <footer>
+      <p>© <span id="year"></span> Prompeii — Curated Intelligence for Creative People.</p>
+    </footer>
+
+    <!-- 🔗 JS -->
+    <script type="module" src="./app.js"></script>
+
+    <script>
+      // Dynamic footer year
+      document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
   </body>
 </html>
