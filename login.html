@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prompeii — Admin Login</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    body {
+      background: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-container {
+      background: #1a1a1a;
+      padding: 40px;
+      width: 360px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255, 60, 40, 0.2);
+    }
+
+    h1 {
+      color: #ff3b30;
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 14px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #0d0d0d;
+      color: #fff;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #ff3b30;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+    <h1>Prompeii Admin</h1>
+
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button id="login-btn">Login</button>
+
+    <p id="error" style="color:#ff3b30; margin-top:15px;"></p>
+  </div>
+
+  <script type="module" src="./login.js"></script>
+</body>
+</html>
