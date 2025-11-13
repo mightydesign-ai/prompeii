@@ -3,94 +3,131 @@
 <head>
   <meta charset="UTF-8" />
   <title>Prompeii Admin Console</title>
-  <link rel="stylesheet" href="./style.css" />
+<link rel="stylesheet" href="admin.css" />
 
-  <style>
-    body {
-      background: #121212;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-    }
-
-    .logout-btn {
-      padding: 10px 16px;
-      border-radius: 6px;
-      background: #ff3b30;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #1a1a1a;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #333;
-    }
-
-    input.edit-input {
-      width: 95%;
-      padding: 6px;
-      background: #0d0d0d;
-      border: 1px solid #333;
-      color: #fff;
-      border-radius: 4px;
-    }
-
-    .save-btn {
-      background: #ff3b30;
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      color: #fff;
-      font-weight: bold;
-    }
-  </style>
 </head>
 
-<body>
-  <header>
-    <h1>Prompeii Admin Console</h1>
-    <button class="logout-btn" id="logout-btn">Logout</button>
+<body class="admin-body">
+
+  <!-- Header -->
+  <header class="admin-header">
+    <div>
+      <h1>Prompeii Admin Console</h1>
+      <p class="admin-subtitle">Curate and score prompts for the public app.</p>
+    </div>
+
+    <div class="admin-actions">
+      <button class="btn btn-primary" id="add-prompt-btn">+ New Prompt</button>
+      <button class="btn btn-secondary" id="logout-btn">Logout</button>
+    </div>
   </header>
 
-  <table>
-   <thead>
-  <tr>
-    <th>Smart Title</th>
-    <th>Prompt</th>
-    <th>Intro</th>
-    <th>Category</th>
-    <th>Tags</th>
-    <th>Tone</th>
-    <th>Use Case</th>
-    <th>Skill Level</th>
-    <th>Score</th>
-    <th>Clarity</th>
-    <th>Creativity</th>
-    <th>Usefulness</th>
-    <th>Actions</th>
-  </tr>
-</thead>
+  <!-- Prompts Table -->
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Smart Title</th>
+        <th>Prompt</th>
+        <th>Intro</th>
+        <th>Category</th>
+        <th>Tags</th>
+        <th>Tone</th>
+        <th>Use Case</th>
+        <th>Skill Level</th>
+        <th>Score</th>
+        <th>Clarity</th>
+        <th>Creativity</th>
+        <th>Usefulness</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
     <tbody id="prompt-table"></tbody>
   </table>
+
+  <!-- 🌋 New Prompt Modal -->
+  <div id="modal-backdrop" class="modal-backdrop hidden">
+    <div class="modal">
+
+      <h2>New Prompt</h2>
+      <p class="modal-description">Add a curated prompt with metadata. Tags are comma-separated.</p>
+
+      <form id="new-prompt-form">
+
+        <label>
+          Smart Title
+          <input type="text" name="smart_title" required />
+        </label>
+
+        <label>
+          Intro
+          <textarea name="intro" rows="2"></textarea>
+        </label>
+
+        <label>
+          Prompt
+          <textarea name="prompt" rows="4" required></textarea>
+        </label>
+
+        <label>
+          Category
+          <input type="text" name="category" />
+        </label>
+
+        <label>
+          Tags (comma-separated)
+          <input type="text" name="tags" placeholder="blog, ux, research" />
+        </label>
+
+        <label>
+          Tone
+          <input type="text" name="tone" />
+        </label>
+
+        <label>
+          Use Case
+          <input type="text" name="use_case" />
+        </label>
+
+        <label>
+          Skill Level
+          <input type="text" name="skill_level" />
+        </label>
+
+        <div class="modal-grid">
+          <label>
+            Quality Score
+            <input type="number" name="quality_score" min="0" max="10" step="0.1" value="8" />
+          </label>
+
+          <label>
+            Clarity
+            <input type="number" name="clarity" min="0" max="10" step="0.1" value="8" />
+          </label>
+
+          <label>
+            Creativity
+            <input type="number" name="creativity" min="0" max="10" step="0.1" value="8" />
+          </label>
+
+          <label>
+            Usefulness
+            <input type="number" name="usefulness" min="0" max="10" step="0.1" value="8" />
+          </label>
+        </div>
+
+        <label>
+          Status
+          <input type="text" name="status" value="curated" />
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" id="cancel-modal" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Prompt</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
 
   <script type="module" src="./admin.js"></script>
 </body>

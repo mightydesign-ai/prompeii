@@ -1,0 +1,111 @@
+/* ===========================
+   Base Styles (Public App)
+   =========================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+  background: #f5f5f5;
+  color: #111;
+}
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 16px 64px;
+}
+
+h1 {
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  margin-top: 0;
+  margin-bottom: 24px;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* Navigation buttons */
+
+.nav-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.nav-actions button {
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  padding: 8px 16px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.nav-actions button.active {
+  border-color: #ff3b30;
+  color: #ff3b30;
+}
+
+/* Prompt grid */
+
+.prompt-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin-top: 16px;
+}
+
+.prompt-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e2e2;
+  padding: 16px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+}
+
+.prompt-card h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.prompt-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+/* Tags */
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag-pill {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f0f0f0;
+  color: #555;
+}
+
+/* Footer */
+
+.footer {
+  margin-top: 32px;
+  font-size: 0.8rem;
+  color: #777;
+}
