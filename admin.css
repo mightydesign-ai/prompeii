@@ -181,3 +181,30 @@ body.admin-body {
   justify-content: flex-end;
   gap: 12px;
 }
+
+.admin-filters {
+  max-width: 1200px;
+  margin: 0 auto 20px;
+  display: flex;
+  gap: 12px;
+}
+
+.filter-input,
+.filter-select {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background: #1f1f1f;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.filter-input {
+  flex: 1;
+}
+
+th[data-sort] {
+  cursor: pointer;
+  color: #ff3b30;
+  user-select: none;
+}

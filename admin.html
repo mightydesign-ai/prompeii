@@ -21,25 +21,39 @@
     </div>
   </header>
 
+  <!-- Filters -->
+<div class="admin-filters">
+  <input
+    id="search-input"
+    type="text"
+    placeholder="Search prompts..."
+    class="filter-input"
+  />
+
+  <select id="category-filter" class="filter-select">
+    <option value="">All Categories</option>
+  </select>
+
+  <button id="clear-filters" class="btn btn-secondary">Clear</button>
+</div>
+
   <!-- Prompts Table -->
   <table class="admin-table">
     <thead>
       <tr>
-        <th>Smart Title</th>
-        <th>Prompt</th>
-        <th>Intro</th>
-        <th>Category</th>
-        <th>Tags</th>
-        <th>Tone</th>
-        <th>Use Case</th>
-        <th>Skill Level</th>
-        <th>Score</th>
-        <th>Clarity</th>
-        <th>Creativity</th>
-        <th>Usefulness</th>
-        <th>Actions</th>
+ <th data-sort="smart_title">Smart Title ▲▼</th>
+<th data-sort="prompt">Prompt ▲▼</th>
+<th data-sort="intro">Intro ▲▼</th>
+<th data-sort="category">Category ▲▼</th>
+<th data-sort="quality_score">Score ▲▼</th>
+<th data-sort="clarity">Clarity ▲▼</th>
+<th data-sort="creativity">Creativity ▲▼</th>
+<th data-sort="usefulness">Usefulness ▲▼</th>
       </tr>
     </thead>
+
+
+    
 
     <!-- IMPORTANT: This ID MUST MATCH admin.js -->
     <tbody id="prompts-table-body"></tbody>
