@@ -21,41 +21,25 @@
     </div>
   </header>
 
-  <!-- Filters -->
-<div class="admin-filters">
-  <input
-    id="search-input"
-    type="text"
-    placeholder="Search prompts..."
-    class="filter-input"
-  />
-
-  <select id="category-filter" class="filter-select">
-    <option value="">All Categories</option>
-  </select>
-
-  <button id="clear-filters" class="btn btn-secondary">Clear</button>
-</div>
-
   <!-- Prompts Table -->
   <table class="admin-table">
     <thead>
       <tr>
- <th data-sort="smart_title">Smart Title ▲▼</th>
-<th data-sort="prompt">Prompt ▲▼</th>
-<th data-sort="intro">Intro ▲▼</th>
-<th data-sort="category">Category ▲▼</th>
-<th data-sort="quality_score">Score ▲▼</th>
-<th data-sort="clarity">Clarity ▲▼</th>
-<th data-sort="creativity">Creativity ▲▼</th>
-<th data-sort="usefulness">Usefulness ▲▼</th>
+        <th>Smart Title</th>
+        <th>Prompt</th>
+        <th>Intro</th>
+        <th>Category</th>
+        <th>Tags</th>
+        <th>Tone</th>
+        <th>Use Case</th>
+        <th>Skill Level</th>
+        <th>Score</th>
+        <th>Clarity</th>
+        <th>Creativity</th>
+        <th>Usefulness</th>
+        <th>Actions</th>
       </tr>
     </thead>
-
-
-    
-
-    <!-- IMPORTANT: This ID MUST MATCH admin.js -->
     <tbody id="prompts-table-body"></tbody>
   </table>
 
@@ -64,7 +48,9 @@
     <div class="modal">
 
       <h2>New Prompt</h2>
-      <p class="modal-description">Add a curated prompt with metadata. Tags are comma-separated.</p>
+      <p class="modal-description">
+        Add a curated prompt with metadata. Tags are comma-separated.
+      </p>
 
       <form id="new-prompt-form">
 
@@ -134,6 +120,9 @@
           Status
           <input type="text" name="status" value="curated" />
         </label>
+
+        <!-- 🔥 Step 1: Warning Box -->
+        <div id="modal-warnings" class="warnings hidden"></div>
 
         <div class="modal-actions">
           <button type="button" id="cancel-modal" class="btn btn-secondary">Cancel</button>
