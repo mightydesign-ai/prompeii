@@ -145,14 +145,17 @@
     </main>
 
     <!-- ===========================
-         NEW PROMPT MODAL
+         NEW / EDIT PROMPT MODAL
     ============================ -->
     <div
       id="modal-backdrop"
       class="modal-backdrop hidden"
     >
       <div class="modal">
-        <h2 class="modal-title">
+        <h2
+          class="modal-title"
+          id="modal-title"
+        >
           New Prompt
         </h2>
 
@@ -161,6 +164,9 @@
         </p>
 
         <form id="new-prompt-form">
+          <!-- Hidden ID for edit mode -->
+          <input type="hidden" name="id" id="prompt-id" />
+
           <!-- Smart Title -->
           <label class="modal-field">
             <span class="field-label">Smart Title</span>
@@ -319,7 +325,7 @@
               type="submit"
               class="btn btn-primary"
             >
-              Create Prompt
+              Save Prompt
             </button>
           </div>
         </form>

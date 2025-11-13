@@ -19,6 +19,9 @@ let currentSort = {
   ascending: true,
 };
 
+// Keep current prompts in memory so Edit can look them up
+let currentPrompts = [];
+
 /* ==========================================
    HELPER FUNCTIONS
 ========================================== */
@@ -121,7 +124,8 @@ async function loadPrompts() {
     return;
   }
 
-  renderPrompts(data || []);
+  currentPrompts = data || [];
+  renderPrompts(currentPrompts);
 }
 
 /**
@@ -237,12 +241,21 @@ function renderPrompts(prompts) {
       </td>
       <td>
         <button
+          class="btn btn-secondary edit-btn"
+          data-id="${prompt.id}"
+          type="button"
+        >
+          Edit
+        </button>
+
+        <button
           class="btn btn-primary save-btn"
           data-id="${prompt.id}"
           type="button"
         >
           Save
         </button>
+
         <button
           class="btn btn-secondary delete-btn"
           data-id="${prompt.id}"
@@ -275,6 +288,7 @@ function renderPrompts(prompts) {
 function attachRowEventHandlers() {
   const saveButtons = document.querySelectorAll(".save-btn");
   const deleteButtons = document.querySelectorAll(".delete-btn");
+  const editButtons = document.querySelectorAll(".edit-btn");
 
   saveButtons.forEach((button) => {
     button.addEventListener("click", handleSaveClick);
@@ -283,10 +297,14 @@ function attachRowEventHandlers() {
   deleteButtons.forEach((button) => {
     button.addEventListener("click", handleDeleteClick);
   });
+
+  editButtons.forEach((button) => {
+    button.addEventListener("click", handleEditClick);
+  });
 }
 
 /**
- * Handle Save for a single row.
+ * Handle Save for a single row (inline save).
  */
 async function handleSaveClick(event) {
   const button = event.currentTarget;
@@ -343,6 +361,8 @@ async function handleSaveClick(event) {
     alert("Error saving prompt. See console for details.");
   } else {
     alert("Prompt saved.");
+    // Reload so currentPrompts stays in sync
+    await loadPrompts();
   }
 }
 
@@ -368,9 +388,53 @@ async function handleDeleteClick(event) {
     console.error("Error deleting prompt:", error);
     alert("Error deleting prompt. See console for details.");
   } else {
-    // Reload prompts after deletion
     await loadPrompts();
   }
+}
+
+/**
+ * Handle Edit click: open modal pre-filled for that prompt.
+ */
+function handleEditClick(event) {
+  const button = event.currentTarget;
+  const id = button.dataset.id;
+
+  const prompt = currentPrompts.find((p) => p.id === id);
+  if (!prompt) {
+    console.warn("Prompt not found for id:", id);
+    return;
+  }
+
+  const modalBackdrop = document.getElementById("modal-backdrop");
+  const modalTitle = document.getElementById("modal-title");
+  const form = document.getElementById("new-prompt-form");
+  const warningsBox = document.getElementById("modal-warnings");
+
+  // Set title for edit mode
+  modalTitle.textContent = "Edit Prompt";
+
+  // Clear warnings
+  warningsBox.classList.add("hidden");
+  warningsBox.innerHTML = "";
+
+  // Fill form fields
+  form.elements["id"].value = prompt.id || "";
+  form.elements["smart_title"].value = prompt.smart_title || "";
+  form.elements["intro"].value = prompt.intro || "";
+  form.elements["prompt"].value = prompt.prompt || "";
+  form.elements["category"].value = prompt.category || "";
+  form.elements["tags"].value = (prompt.tags || []).join(", ");
+  form.elements["tone"].value = prompt.tone || "";
+  form.elements["use_case"].value = prompt.use_case || "";
+  form.elements["skill_level"].value = prompt.skill_level || "";
+  form.elements["quality_score"].value = prompt.quality_score ?? 8;
+  form.elements["clarity"].value = prompt.clarity ?? 8;
+  form.elements["creativity"].value = prompt.creativity ?? 8;
+  form.elements["usefulness"].value = prompt.usefulness ?? 8;
+  form.elements["status"].value = prompt.status || "curated";
+
+  // Open modal
+  modalBackdrop.classList.remove("hidden");
 }
 
 /* ==========================================
@@ -421,7 +485,7 @@ function updateSortHeaderLabels() {
 }
 
 /* ==========================================
-   MODAL CONTROLS (NEW PROMPT)
+   MODAL CONTROLS (NEW + EDIT)
 ========================================== */
 
 function setupModalControls() {
@@ -430,9 +494,25 @@ function setupModalControls() {
   const cancelButton = document.getElementById("cancel-modal");
   const form = document.getElementById("new-prompt-form");
   const warningsBox = document.getElementById("modal-warnings");
+  const modalTitle = document.getElementById("modal-title");
 
-  // Open modal
+  // Open modal for NEW prompt
   openButton.addEventListener("click", () => {
+    // Reset form
+    form.reset();
+    form.elements["id"].value = "";
+    // Default scores
+    form.elements["quality_score"].value = 8;
+    form.elements["clarity"].value = 8;
+    form.elements["creativity"].value = 8;
+    form.elements["usefulness"].value = 8;
+    form.elements["status"].value = "curated";
+
+    // Title + warnings
+    modalTitle.textContent = "New Prompt";
+    warningsBox.classList.add("hidden");
+    warningsBox.innerHTML = "";
+
     modalBackdrop.classList.remove("hidden");
   });
 
@@ -444,11 +524,13 @@ function setupModalControls() {
     form.reset();
   });
 
-  // Submit new prompt
+  // Submit new or edited prompt
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const formData = new FormData(form);
+
+    const id = (formData.get("id") || "").trim();
 
     const fields = {
       smart_title: (formData.get("smart_title") || "").trim(),
@@ -489,21 +571,28 @@ function setupModalControls() {
       Object.assign(fields, scores);
     }
 
-    const { error } = await supabase
-      .from("prompts")
-      .insert(fields);
+    let error;
+
+    if (id) {
+      // EDIT mode → update
+      const result = await supabase.from("prompts").update(fields).eq("id", id);
+      error = result.error;
+    } else {
+      // NEW mode → insert
+      const result = await supabase.from("prompts").insert(fields);
+      error = result.error;
+    }
 
     if (error) {
-      console.error("Error creating prompt:", error);
-      alert("Error creating prompt. See console for details.");
+      console.error("Error saving prompt via modal:", error);
+      alert("Error saving prompt. See console for details.");
       return;
     }
 
-    // Reset and close
     form.reset();
     modalBackdrop.classList.add("hidden");
 
-    // Reload prompts after adding
+    // Reload prompts after add/edit
     await loadPrompts();
   });
 }

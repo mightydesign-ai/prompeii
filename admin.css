@@ -87,7 +87,7 @@
 }
 
 .actions-col {
-  width: 120px;
+  width: 160px;
 }
 
 /* ===============================
@@ -168,6 +168,16 @@ textarea {
 
 .btn-secondary:hover {
   background: #3a3a3a;
+}
+
+/* Slightly more destructive look for delete buttons if you add a class later */
+.btn-danger {
+  background: #b00020;
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background: #ca1231;
 }
 
 /* ===============================
