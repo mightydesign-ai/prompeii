@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Prompeii Admin Console</title>
-<link rel="stylesheet" href="admin.css" />
-
+  <link rel="stylesheet" href="admin.css" />
 </head>
 
 <body class="admin-body">
@@ -41,7 +40,9 @@
         <th>Actions</th>
       </tr>
     </thead>
-    <tbody id="prompt-table"></tbody>
+
+    <!-- IMPORTANT: This ID MUST MATCH admin.js -->
+    <tbody id="prompts-table-body"></tbody>
   </table>
 
   <!-- 🌋 New Prompt Modal -->
