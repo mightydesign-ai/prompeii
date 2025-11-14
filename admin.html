@@ -1,341 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Prompeii Admin Console</title>
-
-    <!-- Admin-specific stylesheet -->
-    <link rel="stylesheet" href="admin.css" />
-  </head>
-
-  <body class="admin-body">
-    <!-- ===========================
-         HEADER
-    ============================ -->
-    <header class="admin-header">
-      <div class="admin-header-left">
-        <h1 class="admin-title">Prompeii Admin Console</h1>
-        <p class="admin-subtitle">
-          Curate, score, and manage prompts for the public Prompeii app.
-        </p>
-      </div>
-
-      <div class="admin-header-right admin-actions">
-        <button
-          class="btn btn-primary"
-          id="add-prompt-btn"
-          type="button"
-        >
-          + New Prompt
-        </button>
-
-        <button
-          class="btn btn-secondary"
-          id="logout-btn"
-          type="button"
-        >
-          Logout
-        </button>
-      </div>
-    </header>
-
-    <!-- ===========================
-         PROMPTS TABLE
-    ============================ -->
-    <main class="admin-main">
-      <section class="admin-table-wrapper">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <!-- Each sortable header has data-column used by JS -->
-              <th
-                class="sortable"
-                data-column="smart_title"
-              >
-                Smart Title ▲▼
-              </th>
-
-              <th
-                class="sortable"
-                data-column="prompt"
-              >
-                Prompt ▲▼
-              </th>
-
-              <th
-                class="sortable"
-                data-column="intro"
-              >
-                Intro ▲▼
-              </th>
-
-              <th
-                class="sortable"
-                data-column="category"
-              >
-                Category ▲▼
-              </th>
-
-              <th
-                class="sortable"
-                data-column="tags"
-              >
-                Tags ▲▼
-              </th>
-
-              <th
-                class="sortable"
-                data-column="tone"
-              >
-                Tone ▲▼
-              </th>
-
-              <th
-                class="sortable"
-                data-column="use_case"
-              >
-                Use Case ▲▼
-              </th>
-
-              <th
-                class="sortable"
-                data-column="skill_level"
-              >
-                Skill Level ▲▼
-              </th>
-
-              <th
-                class="sortable"
-                data-column="quality_score"
-              >
-                Score ▲▼
-              </th>
-
-              <th
-                class="sortable"
-                data-column="clarity"
-              >
-                Clarity ▲▼
-              </th>
-
-              <th
-                class="sortable"
-                data-column="creativity"
-              >
-                Creativity ▲▼
-              </th>
-
-              <th
-                class="sortable"
-                data-column="usefulness"
-              >
-                Usefulness ▲▼
-              </th>
-
-              <th class="actions-col">
-                Actions
-              </th>
-            </tr>
-          </thead>
-
-          <!-- Table body is fully rendered by admin.js -->
-          <tbody id="prompts-table-body"></tbody>
-        </table>
-      </section>
-    </main>
-
-    <!-- ===========================
-         NEW / EDIT PROMPT MODAL
-    ============================ -->
-    <div
-      id="modal-backdrop"
-      class="modal-backdrop hidden"
-    >
-      <div class="modal">
-        <h2
-          class="modal-title"
-          id="modal-title"
-        >
-          New Prompt
-        </h2>
-
-        <p class="modal-description">
-          Add a curated AI prompt with metadata. Tags are comma-separated.
-        </p>
-
-        <form id="new-prompt-form">
-          <!-- Hidden ID for edit mode -->
-          <input type="hidden" name="id" id="prompt-id" />
-
-          <!-- Smart Title -->
-          <label class="modal-field">
-            <span class="field-label">Smart Title</span>
-            <input
-              type="text"
-              name="smart_title"
-              required
-            />
-          </label>
-
-          <!-- Intro -->
-          <label class="modal-field">
-            <span class="field-label">Intro</span>
-            <textarea
-              name="intro"
-              rows="2"
-            ></textarea>
-          </label>
-
-          <!-- Prompt -->
-          <label class="modal-field">
-            <span class="field-label">Prompt</span>
-            <textarea
-              name="prompt"
-              rows="4"
-              required
-            ></textarea>
-          </label>
-
-          <!-- Category -->
-          <label class="modal-field">
-            <span class="field-label">Category</span>
-            <input
-              type="text"
-              name="category"
-            />
-          </label>
-
-          <!-- Tags -->
-          <label class="modal-field">
-            <span class="field-label">
-              Tags (comma-separated)
-            </span>
-            <input
-              type="text"
-              name="tags"
-              placeholder="blog, ux, research"
-            />
-          </label>
-
-          <!-- Tone -->
-          <label class="modal-field">
-            <span class="field-label">Tone</span>
-            <input
-              type="text"
-              name="tone"
-            />
-          </label>
-
-          <!-- Use Case -->
-          <label class="modal-field">
-            <span class="field-label">Use Case</span>
-            <input
-              type="text"
-              name="use_case"
-            />
-          </label>
-
-          <!-- Skill Level -->
-          <label class="modal-field">
-            <span class="field-label">Skill Level</span>
-            <input
-              type="text"
-              name="skill_level"
-            />
-          </label>
-
-          <!-- Scores Grid -->
-          <div class="modal-grid">
-            <label class="modal-field">
-              <span class="field-label">Quality Score</span>
-              <input
-                type="number"
-                name="quality_score"
-                min="0"
-                max="10"
-                step="0.1"
-                value="8"
-              />
-            </label>
-
-            <label class="modal-field">
-              <span class="field-label">Clarity</span>
-              <input
-                type="number"
-                name="clarity"
-                min="0"
-                max="10"
-                step="0.1"
-                value="8"
-              />
-            </label>
-
-            <label class="modal-field">
-              <span class="field-label">Creativity</span>
-              <input
-                type="number"
-                name="creativity"
-                min="0"
-                max="10"
-                step="0.1"
-                value="8"
-              />
-            </label>
-
-            <label class="modal-field">
-              <span class="field-label">Usefulness</span>
-              <input
-                type="number"
-                name="usefulness"
-                min="0"
-                max="10"
-                step="0.1"
-                value="8"
-              />
-            </label>
-          </div>
-
-          <!-- Status -->
-          <label class="modal-field">
-            <span class="field-label">Status</span>
-            <input
-              type="text"
-              name="status"
-              value="curated"
-            />
-          </label>
-
-          <!-- Modal-level warnings -->
-          <div
-            id="modal-warnings"
-            class="warnings hidden"
-          ></div>
-
-          <!-- Modal Actions -->
-          <div class="modal-actions">
-            <button
-              id="cancel-modal"
-              type="button"
-              class="btn btn-secondary"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              class="btn btn-primary"
-            >
-              Save Prompt
-            </button>
-          </div>
-        </form>
-      </div>
+<head>
+  <meta charset="UTF-8" />
+  <title>Prompeii Admin Console — Prompt List</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body class="admin-body">
+  <!-- Header -->
+  <header class="admin-header">
+    <div>
+      <h1>Prompeii Admin Console</h1>
+      <p class="admin-subtitle">Browse, filter, and edit prompts in your catalog.</p>
     </div>
 
-    <!-- Admin logic -->
-    <script
-      type="module"
-      src="admin.js"
-    ></script>
-  </body>
+    <div class="admin-actions">
+      <a href="admin-create.html" class="btn btn-primary">
+        + New Prompt
+      </a>
+    </div>
+  </header>
+
+  <!-- Toast / notifications -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Main content -->
+  <main class="admin-main">
+    <!-- Controls -->
+    <section class="toolbar">
+      <div class="toolbar-left">
+        <div class="search-group">
+          <input
+            type="search"
+            id="searchInput"
+            class="input search-input"
+            placeholder="Search by title, category, tag, status…"
+          />
+        </div>
+
+        <div class="filter-group">
+          <label for="statusFilter" class="filter-label">Status</label>
+          <select id="statusFilter" class="input filter-input">
+            <option value="all">All</option>
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="toolbar-right">
+        <span id="rowCount" class="row-count">0 prompts</span>
+      </div>
+    </section>
+
+    <!-- Table -->
+    <section class="table-section">
+      <div class="table-card">
+        <table class="prompt-table">
+          <thead>
+            <tr>
+              <th data-sort-key="smart_title" class="sortable">
+                Smart Title
+                <span class="sort-indicator"></span>
+              </th>
+              <th data-sort-key="category" class="sortable">
+                Category
+                <span class="sort-indicator"></span>
+              </th>
+              <th>Tags</th>
+              <th data-sort-key="model" class="sortable">
+                Model
+                <span class="sort-indicator"></span>
+              </th>
+              <th data-sort-key="clarity" class="sortable numeric">
+                Clarity
+                <span class="sort-indicator"></span>
+              </th>
+              <th data-sort-key="creativity" class="sortable numeric">
+                Creativity
+                <span class="sort-indicator"></span>
+              </th>
+              <th data-sort-key="usefulness" class="sortable numeric">
+                Usefulness
+                <span class="sort-indicator"></span>
+              </th>
+              <th data-sort-key="quality_score" class="sortable numeric">
+                Quality
+                <span class="sort-indicator"></span>
+              </th>
+              <th data-sort-key="updated_at" class="sortable numeric">
+                Updated
+                <span class="sort-indicator"></span>
+              </th>
+              <th><!-- Actions column --></th>
+            </tr>
+          </thead>
+          <tbody id="promptTableBody">
+            <!-- Rows injected by JS -->
+          </tbody>
+        </table>
+
+        <div id="emptyState" class="empty-state" hidden>
+          <p>No prompts found. Try adjusting your search or filters.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Supabase + page logic -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="admin.js"></script>
+</body>
 </html>

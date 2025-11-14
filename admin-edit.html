@@ -48,10 +48,6 @@
               <span class="system-label">Prompt ID</span>
               <span id="fieldPromptId" class="system-value">—</span>
             </span>
-            <span class="system-item">
-              <span class="system-label">Version</span>
-              <span id="fieldVersion" class="system-value">—</span>
-            </span>
           </div>
           <div class="system-meta">
             <span class="system-item">
@@ -61,10 +57,6 @@
             <span class="system-item">
               <span class="system-label">Last Updated</span>
               <span id="fieldLastUpdated" class="system-value">—</span>
-            </span>
-            <span class="system-item">
-              <span class="system-label">Checksum</span>
-              <span id="fieldChecksum" class="system-value">—</span>
             </span>
           </div>
         </section>
@@ -81,12 +73,12 @@
 
               <div class="field-group">
                 <label for="smartTitleHuman" class="field-label">
-                  Smart Title (Human-readable) <span class="required">*</span>
+                  Smart Title <span class="required">*</span>
                 </label>
                 <input
                   type="text"
                   id="smartTitleHuman"
-                  name="smart_title_human"
+                  name="smart_title"
                   class="input"
                   required
                   maxlength="200"
@@ -147,11 +139,12 @@
                   placeholder="e.g. email, tone-of-voice, outreach"
                 />
                 <p class="field-hint">
-                  Comma-separated list. Example: <code>email, tone, outreach</code>
+                  Comma-separated list. Example: <code>email, tone, outreach</code><br />
+                  Stored as a <code>text[]</code> array in Supabase.
                 </p>
               </div>
 
-              <div class="field-grid field-grid-3">
+              <div class="field-grid field-grid-2">
                 <div class="field-group">
                   <label for="tone" class="field-label">Tone</label>
                   <select id="tone" name="tone" class="input">
@@ -176,7 +169,9 @@
                     <option value="coding">Coding</option>
                   </select>
                 </div>
+              </div>
 
+              <div class="field-grid field-grid-2">
                 <div class="field-group">
                   <label for="skillLevel" class="field-label">Skill Level</label>
                   <select id="skillLevel" name="skill_level" class="input">
@@ -186,36 +181,18 @@
                     <option value="advanced">Advanced</option>
                   </select>
                 </div>
-              </div>
-
-              <div class="field-grid field-grid-2">
-                <div class="field-group toggle-group">
-                  <label class="field-label">Curated</label>
-                  <label class="toggle">
-                    <input type="checkbox" id="isCurated" name="is_curated" />
-                    <span class="toggle-slider"></span>
-                    <span class="toggle-label">Marked as curated</span>
-                  </label>
-                  <p class="field-hint">
-                    Curated prompts are highlighted in the public directory.
-                  </p>
-                </div>
 
                 <div class="field-group">
-                  <label for="popularityScore" class="field-label">
-                    Popularity Score
-                  </label>
+                  <label for="model" class="field-label">Model</label>
                   <input
-                    type="number"
-                    id="popularityScore"
-                    name="popularity_score"
+                    type="text"
+                    id="model"
+                    name="model"
                     class="input"
-                    min="0"
-                    max="100"
-                    step="1"
+                    placeholder="e.g. gpt-5.1, claude-3.5"
                   />
                   <p class="field-hint">
-                    Optional. Used for ranking and experimentation.
+                    Optional. Notes which LLM this prompt was tuned for.
                   </p>
                 </div>
               </div>
@@ -242,38 +219,11 @@
                   />
                 </div>
                 <div class="field-group">
-                  <label for="structure" class="field-label">Structure</label>
+                  <label for="creativity" class="field-label">Creativity</label>
                   <input
                     type="number"
-                    id="structure"
-                    name="structure"
-                    class="input"
-                    min="1"
-                    max="5"
-                    step="1"
-                  />
-                </div>
-                <div class="field-group">
-                  <label for="originality" class="field-label">Originality</label>
-                  <input
-                    type="number"
-                    id="originality"
-                    name="originality"
-                    class="input"
-                    min="1"
-                    max="5"
-                    step="1"
-                  />
-                </div>
-              </div>
-
-              <div class="field-grid field-grid-3">
-                <div class="field-group">
-                  <label for="depth" class="field-label">Depth</label>
-                  <input
-                    type="number"
-                    id="depth"
-                    name="depth"
+                    id="creativity"
+                    name="creativity"
                     class="input"
                     min="1"
                     max="5"
@@ -292,76 +242,26 @@
                     step="1"
                   />
                 </div>
-                <div class="field-group">
-                  <label for="coherence" class="field-label">Coherence</label>
-                  <input
-                    type="number"
-                    id="coherence"
-                    name="coherence"
-                    class="input"
-                    min="1"
-                    max="5"
-                    step="1"
-                  />
-                </div>
-              </div>
-
-              <div class="field-grid field-grid-3">
-                <div class="field-group">
-                  <label for="creativity" class="field-label">Creativity</label>
-                  <input
-                    type="number"
-                    id="creativity"
-                    name="creativity"
-                    class="input"
-                    min="1"
-                    max="5"
-                    step="1"
-                  />
-                </div>
-                <div class="field-group">
-                  <label for="qualityScore" class="field-label">
-                    Quality Score (avg)
-                  </label>
-                  <input
-                    type="number"
-                    id="qualityScore"
-                    name="quality_score"
-                    class="input"
-                    min="1"
-                    max="5"
-                    step="0.1"
-                    readonly
-                  />
-                  <p class="field-hint">
-                    Automatically calculated from the dimensions above.
-                  </p>
-                </div>
-                <div class="field-group">
-                  <label for="prompeiiScore" class="field-label">
-                    Prompeii Score
-                  </label>
-                  <input
-                    type="number"
-                    id="prompeiiScore"
-                    name="prompeii_score"
-                    class="input"
-                    min="1"
-                    max="100"
-                    step="1"
-                  />
-                </div>
               </div>
 
               <div class="field-group">
-                <label for="qualityNotes" class="field-label">Quality Notes</label>
-                <textarea
-                  id="qualityNotes"
-                  name="quality_notes"
-                  class="input textarea"
-                  rows="3"
-                  placeholder="Explain why this prompt is strong, and any caveats."
-                ></textarea>
+                <label for="qualityScore" class="field-label">
+                  Quality Score (avg)
+                </label>
+                <input
+                  type="number"
+                  id="qualityScore"
+                  name="quality_score"
+                  class="input"
+                  min="1"
+                  max="5"
+                  step="0.1"
+                  readonly
+                />
+                <p class="field-hint">
+                  Automatically calculated from clarity, creativity, and usefulness.
+                  Stored in <code>quality_score</code>.
+                </p>
               </div>
             </section>
           </div>
@@ -412,36 +312,19 @@
                 <p class="field-error" data-error-for="prompt"></p>
               </div>
 
-              <div class="field-grid field-grid-2">
-                <div class="field-group toggle-group">
-                  <label class="field-label">Has Variables?</label>
-                  <label class="toggle">
-                    <input
-                      type="checkbox"
-                      id="hasVariables"
-                      name="has_variables"
-                    />
-                    <span class="toggle-slider"></span>
-                    <span class="toggle-label">Prompt includes {{variables}}</span>
-                  </label>
-                  <p class="field-hint">
-                    Automatically detected, but you can override manually.
-                  </p>
+              <!-- Helper-only meta, not stored in DB -->
+              <div class="field-group readonly-card">
+                <div class="meta-row">
+                  <span class="meta-label">Detected Variables</span>
+                  <span id="detectedVariables" class="meta-value">—</span>
                 </div>
-
-                <div class="field-group readonly-card">
-                  <div class="meta-row">
-                    <span class="meta-label">Detected Variables</span>
-                    <span id="detectedVariables" class="meta-value">—</span>
-                  </div>
-                  <div class="meta-row">
-                    <span class="meta-label">Estimated Tokens</span>
-                    <span id="estimatedTokens" class="meta-value">—</span>
-                  </div>
-                  <div class="meta-row">
-                    <span class="meta-label">Length Label</span>
-                    <span id="lengthLabel" class="meta-value">—</span>
-                  </div>
+                <div class="meta-row">
+                  <span class="meta-label">Estimated Tokens</span>
+                  <span id="estimatedTokens" class="meta-value">—</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Length Label</span>
+                  <span id="lengthLabel" class="meta-value">—</span>
                 </div>
               </div>
             </section>
@@ -490,7 +373,9 @@
       </div>
     </div>
   </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Supabase + page logic -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="admin-edit.js"></script>
 </body>
 </html>

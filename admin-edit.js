@@ -1,9 +1,9 @@
 // --- Supabase configuration ---
-// 1) Replace these with your actual values from the Supabase dashboard.
-const SUPABASE_URL = "https://YOUR-PROJECT-id.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR_ANON_PUBLIC_KEY";
+// Replace these with your actual values from the Supabase dashboard.
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// 2) Create Supabase client (v2 via CDN)
+// Create Supabase client (v2 via CDN)
 const supabase = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
@@ -18,15 +18,12 @@ const toastEl = document.getElementById("toast");
 const statusBadge = document.getElementById("statusBadge");
 
 const fieldPromptId = document.getElementById("fieldPromptId");
-const fieldVersion = document.getElementById("fieldVersion");
 const fieldCreated = document.getElementById("fieldCreated");
 const fieldLastUpdated = document.getElementById("fieldLastUpdated");
-const fieldChecksum = document.getElementById("fieldChecksum");
 
 const detectedVariablesEl = document.getElementById("detectedVariables");
 const estimatedTokensEl = document.getElementById("estimatedTokens");
 const lengthLabelEl = document.getElementById("lengthLabel");
-const hasVariablesEl = document.getElementById("hasVariables");
 
 // Modal elements
 const confirmModal = document.getElementById("confirmModal");
@@ -53,7 +50,11 @@ function showToast(message, type = "default") {
 }
 
 function setStatusBadge(status) {
-  statusBadge.classList.remove("badge-published", "badge-draft", "badge-archived");
+  statusBadge.classList.remove(
+    "badge-published",
+    "badge-draft",
+    "badge-archived"
+  );
 
   if (!status) {
     statusBadge.textContent = "Status: —";
@@ -104,8 +105,7 @@ function lengthLabelFromTokens(tokens) {
 }
 
 /**
- * Calculate average quality score based on clarity, creativity, usefulness
- * Only counts fields that have numeric values.
+ * Calculate average quality score based on clarity, creativity, usefulness.
  */
 function calculateQualityScore(data) {
   const keys = ["clarity", "creativity", "usefulness"];
@@ -155,8 +155,6 @@ function updatePromptMetaUI(promptText) {
   lengthLabelEl.textContent = lenLabel || "—";
   detectedVariablesEl.textContent =
     vars.length > 0 ? vars.join(", ") : "—";
-
-  hasVariablesEl.checked = vars.length > 0;
 }
 
 /* ------------------- LOAD + INITIALISE ------------------- */
@@ -196,13 +194,11 @@ function populateForm(data) {
 
   // System / meta
   fieldPromptId.textContent = data.id || "—";
-  fieldVersion.textContent = "—"; // no version column in schema; keep placeholder
   fieldCreated.textContent = formatDate(data.created_at);
   fieldLastUpdated.textContent = formatDate(data.updated_at);
-  fieldChecksum.textContent = "—"; // no checksum column; placeholder
   setStatusBadge(data.status);
 
-  // Basic metadata (note: smart_title in DB, mapped to "Smart Title" field)
+  // Basic metadata
   document.getElementById("smartTitleHuman").value = data.smart_title || "";
   document.getElementById("category").value = data.category || "";
   document.getElementById("status").value = data.status || "";
@@ -241,7 +237,6 @@ function populateForm(data) {
 
 /**
  * Reads current form values into an object that matches your Supabase schema.
- * This is the ONLY shape we send to the DB.
  */
 function getFormDataFromDom() {
   const tagsValue = document.getElementById("tags").value;
@@ -392,7 +387,7 @@ async function savePrompt() {
       return;
     }
 
-    // Refresh UI with returned row (in case DB changed anything)
+    // Refresh UI with returned row
     populateForm(data);
     initialData = cloneData(getFormDataFromDom());
     updateDirtyState();
@@ -457,7 +452,6 @@ async function init() {
     updateDirtyState();
   } catch (e) {
     console.error("Init error:", e);
-    // Form is basically unusable if we can't load; leave as-is.
   }
 }
 
@@ -507,9 +501,7 @@ form.addEventListener("input", (event) => {
   if (!target) return;
 
   // Live-update quality score
-  if (
-    ["clarity", "creativity", "usefulness"].includes(target.id)
-  ) {
+  if (["clarity", "creativity", "usefulness"].includes(target.id)) {
     const data = getFormDataFromDom();
     const q = calculateQualityScore(data);
     document.getElementById("qualityScore").value = q || "";

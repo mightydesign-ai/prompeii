@@ -1,606 +1,383 @@
-import { createClient } from "@supabase/supabase-js";
-
-/* ==========================================
-   SUPABASE CLIENT SETUP
-========================================== */
-
+// --- Supabase configuration ---
+// Replace these with your actual values from the Supabase dashboard.
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Create Supabase client (v2 via CDN)
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
-/* ==========================================
-   GLOBAL STATE
-========================================== */
+// DOM elements
+const toastEl = document.getElementById("toast");
+const searchInput = document.getElementById("searchInput");
+const statusFilter = document.getElementById("statusFilter");
+const tableBody = document.getElementById("promptTableBody");
+const rowCountEl = document.getElementById("rowCount");
+const emptyStateEl = document.getElementById("emptyState");
 
-// Sorting state for table
-let currentSort = {
-  column: "smart_title",
-  ascending: true,
+const tableElement = document.querySelector(".prompt-table");
+const headerCells = tableElement.querySelectorAll("th.sortable");
+
+// State
+const state = {
+  rows: [],
+  filteredRows: [],
+  sortKey: "updated_at",
+  sortDirection: "desc", // "asc" | "desc"
+  searchQuery: "",
+  statusFilter: "all",
 };
 
-// Keep current prompts in memory so Edit can look them up
-let currentPrompts = [];
+/* ------------------- Utilities ------------------- */
 
-/* ==========================================
-   HELPER FUNCTIONS
-========================================== */
+function showToast(message, type = "default") {
+  if (!toastEl) return;
+  toastEl.textContent = message;
+  toastEl.classList.add("toast-visible");
 
-/**
- * Clean tags: split on commas, trim, lowercase, dedupe.
- */
-function cleanTags(raw) {
-  if (!raw) return [];
-
-  const parts = raw
-    .split(",")
-    .map((t) => t.trim().toLowerCase())
-    .filter((t) => t.length > 0);
-
-  const unique = [...new Set(parts)];
-  return unique;
+  setTimeout(() => {
+    toastEl.classList.remove("toast-visible");
+  }, 2600);
 }
 
-/**
- * Generate a simple smart title from the first sentence of the prompt.
- */
-function generateSmartTitle(promptText) {
-  if (!promptText) return "";
-
-  let firstSentence = promptText.split(".")[0];
-
-  if (firstSentence.length > 80) {
-    firstSentence = firstSentence.slice(0, 80) + "...";
-  }
-
-  return firstSentence.replace(/\n/g, " ").trim();
+function formatDateShort(timestamp) {
+  if (!timestamp) return "—";
+  const d = new Date(timestamp);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
-/**
- * Validate the core fields of a prompt; returns an array of warning strings.
- */
-function validatePromptFields(fields) {
-  const warnings = [];
-
-  if (!fields.smart_title || fields.smart_title.trim().length < 3) {
-    warnings.push("Smart title is missing or very short.");
+function formatNumber(value, decimals = 1) {
+  if (value === null || typeof value === "undefined" || value === "") {
+    return "—";
   }
-
-  if (!fields.prompt || fields.prompt.trim().length < 10) {
-    warnings.push("Prompt content is too short.");
-  }
-
-  if (fields.prompt && fields.prompt.length > 800) {
-    warnings.push("Prompt content is very long — consider tightening it up.");
-  }
-
-  if (!fields.category || fields.category.trim().length === 0) {
-    warnings.push("Category is missing.");
-  }
-
-  return warnings;
+  const n = Number(value);
+  if (Number.isNaN(n)) return "—";
+  return n.toFixed(decimals);
 }
 
-/**
- * Auto-score a prompt based on length and keywords.
- * Very rough heuristic; you can refine this later or plug in AI.
- */
-function autoScorePrompt(fields) {
-  const promptText = fields.prompt || "";
-
-  let clarity = promptText.length < 300 ? 9 : 7;
-  let creativity = promptText.toLowerCase().includes("imagine") ? 9 : 7;
-  let usefulness = promptText.toLowerCase().includes("steps") ? 9 : 7;
-
-  const avg = (clarity + creativity + usefulness) / 3;
-  const quality_score = Number(avg.toFixed(1));
-
-  return {
-    clarity,
-    creativity,
-    usefulness,
-    quality_score,
-  };
+function normalizeStatus(status) {
+  if (!status) return "";
+  return String(status).toLowerCase();
 }
 
-/* ==========================================
-   LOAD AND RENDER PROMPTS
-========================================== */
+function statusClass(status) {
+  const s = normalizeStatus(status);
+  if (s === "published") return "status-badge status-published";
+  if (s === "draft") return "status-badge status-draft";
+  if (s === "archived") return "status-badge status-archived";
+  return "status-badge";
+}
 
-/**
- * Fetch prompts from Supabase using currentSort,
- * then pass them to the renderer.
- */
+function joinTags(tagsArray) {
+  if (!Array.isArray(tagsArray) || !tagsArray.length) return [];
+  return tagsArray;
+}
+
+/* ------------------- Supabase Load ------------------- */
+
 async function loadPrompts() {
-  const { column, ascending } = currentSort;
-
-  const { data, error } = await supabase
-    .from("prompts")
-    .select("*")
-    .order(column, { ascending });
-
-  if (error) {
-    console.error("Error loading prompts:", error);
-    return;
-  }
-
-  currentPrompts = data || [];
-  renderPrompts(currentPrompts);
-}
-
-/**
- * Render all prompts into the table body.
- */
-function renderPrompts(prompts) {
-  const tableBody = document.getElementById("prompts-table-body");
-  tableBody.innerHTML = "";
-
-  prompts.forEach((prompt) => {
-    const row = document.createElement("tr");
-    row.classList.add("prompt-row");
-
-    // Main editable row
-    row.innerHTML = `
-      <td>
-        <input
-          type="text"
-          data-field="smart_title"
-          data-id="${prompt.id}"
-          value="${prompt.smart_title || ""}"
-        />
-      </td>
-      <td>
-        <textarea
-          data-field="prompt"
-          data-id="${prompt.id}"
-          rows="3"
-        >${prompt.prompt || ""}</textarea>
-      </td>
-      <td>
-        <textarea
-          data-field="intro"
-          data-id="${prompt.id}"
-          rows="2"
-        >${prompt.intro || ""}</textarea>
-      </td>
-      <td>
-        <input
-          type="text"
-          data-field="category"
-          data-id="${prompt.id}"
-          value="${prompt.category || ""}"
-        />
-      </td>
-      <td>
-        <input
-          type="text"
-          data-field="tags"
-          data-id="${prompt.id}"
-          value="${(prompt.tags || []).join(", ")}"
-        />
-      </td>
-      <td>
-        <input
-          type="text"
-          data-field="tone"
-          data-id="${prompt.id}"
-          value="${prompt.tone || ""}"
-        />
-      </td>
-      <td>
-        <input
-          type="text"
-          data-field="use_case"
-          data-id="${prompt.id}"
-          value="${prompt.use_case || ""}"
-        />
-      </td>
-      <td>
-        <input
-          type="text"
-          data-field="skill_level"
-          data-id="${prompt.id}"
-          value="${prompt.skill_level || ""}"
-        />
-      </td>
-      <td>
-        <input
-          type="number"
-          step="0.1"
-          data-field="quality_score"
-          data-id="${prompt.id}"
-          value="${prompt.quality_score ?? 0}"
-        />
-      </td>
-      <td>
-        <input
-          type="number"
-          step="0.1"
-          data-field="clarity"
-          data-id="${prompt.id}"
-          value="${prompt.clarity ?? 0}"
-        />
-      </td>
-      <td>
-        <input
-          type="number"
-          step="0.1"
-          data-field="creativity"
-          data-id="${prompt.id}"
-          value="${prompt.creativity ?? 0}"
-        />
-      </td>
-      <td>
-        <input
-          type="number"
-          step="0.1"
-          data-field="usefulness"
-          data-id="${prompt.id}"
-          value="${prompt.usefulness ?? 0}"
-        />
-      </td>
-      <td>
-        <button
-          class="btn btn-secondary edit-btn"
-          data-id="${prompt.id}"
-          type="button"
-        >
-          Edit
-        </button>
-
-        <button
-          class="btn btn-primary save-btn"
-          data-id="${prompt.id}"
-          type="button"
-        >
-          Save
-        </button>
-
-        <button
-          class="btn btn-secondary delete-btn"
-          data-id="${prompt.id}"
-          type="button"
-        >
-          Delete
-        </button>
-      </td>
-    `;
-
-    // Warning row that sits under this prompt row
-    const warningRow = document.createElement("tr");
-    warningRow.classList.add("warning-row", "hidden");
-    warningRow.innerHTML = `
-      <td colspan="13" class="warning-cell"></td>
-    `;
-
-    tableBody.appendChild(row);
-    tableBody.appendChild(warningRow);
-  });
-
-  attachRowEventHandlers();
-  updateSortHeaderLabels();
-}
-
-/* ==========================================
-   ROW EVENT HANDLERS
-========================================== */
-
-function attachRowEventHandlers() {
-  const saveButtons = document.querySelectorAll(".save-btn");
-  const deleteButtons = document.querySelectorAll(".delete-btn");
-  const editButtons = document.querySelectorAll(".edit-btn");
-
-  saveButtons.forEach((button) => {
-    button.addEventListener("click", handleSaveClick);
-  });
-
-  deleteButtons.forEach((button) => {
-    button.addEventListener("click", handleDeleteClick);
-  });
-
-  editButtons.forEach((button) => {
-    button.addEventListener("click", handleEditClick);
-  });
-}
-
-/**
- * Handle Save for a single row (inline save).
- */
-async function handleSaveClick(event) {
-  const button = event.currentTarget;
-  const id = button.dataset.id;
-
-  const fieldElements = document.querySelectorAll(`[data-id="${id}"]`);
-  const fields = {};
-
-  fieldElements.forEach((el) => {
-    const fieldName = el.dataset.field;
-
-    if (fieldName === "tags") {
-      fields[fieldName] = cleanTags(el.value);
-    } else {
-      fields[fieldName] = el.value;
-    }
-  });
-
-  // Auto-generate smart_title if missing/short
-  if (!fields.smart_title || fields.smart_title.trim().length < 3) {
-    fields.smart_title = generateSmartTitle(fields.prompt);
-  }
-
-  // Validate fields
-  const warnings = validatePromptFields(fields);
-
-  // Find warning row
-  const mainRow = button.closest("tr");
-  const warningRow = mainRow.nextElementSibling;
-  const warningCell = warningRow.querySelector(".warning-cell");
-
-  if (warnings.length > 0) {
-    warningRow.classList.remove("hidden");
-    warningCell.innerHTML = warnings.join("<br>");
-    return;
-  } else {
-    warningRow.classList.add("hidden");
-    warningCell.innerHTML = "";
-  }
-
-  // Autoscore if no quality_score set
-  if (!fields.quality_score || Number(fields.quality_score) <= 0) {
-    const scores = autoScorePrompt(fields);
-    Object.assign(fields, scores);
-  }
-
-  const { error } = await supabase
-    .from("prompts")
-    .update(fields)
-    .eq("id", id);
-
-  if (error) {
-    console.error("Error saving prompt:", error);
-    alert("Error saving prompt. See console for details.");
-  } else {
-    alert("Prompt saved.");
-    // Reload so currentPrompts stays in sync
-    await loadPrompts();
-  }
-}
-
-/**
- * Handle Delete for a single row.
- */
-async function handleDeleteClick(event) {
-  const button = event.currentTarget;
-  const id = button.dataset.id;
-
-  const confirmed = window.confirm(
-    "Are you sure you want to delete this prompt?"
-  );
-
-  if (!confirmed) return;
-
-  const { error } = await supabase
-    .from("prompts")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    console.error("Error deleting prompt:", error);
-    alert("Error deleting prompt. See console for details.");
-  } else {
-    await loadPrompts();
-  }
-}
-
-/**
- * Handle Edit click: open modal pre-filled for that prompt.
- */
-function handleEditClick(event) {
-  const button = event.currentTarget;
-  const id = button.dataset.id;
-
-  const prompt = currentPrompts.find((p) => p.id === id);
-  if (!prompt) {
-    console.warn("Prompt not found for id:", id);
-    return;
-  }
-
-  const modalBackdrop = document.getElementById("modal-backdrop");
-  const modalTitle = document.getElementById("modal-title");
-  const form = document.getElementById("new-prompt-form");
-  const warningsBox = document.getElementById("modal-warnings");
-
-  // Set title for edit mode
-  modalTitle.textContent = "Edit Prompt";
-
-  // Clear warnings
-  warningsBox.classList.add("hidden");
-  warningsBox.innerHTML = "";
-
-  // Fill form fields
-  form.elements["id"].value = prompt.id || "";
-  form.elements["smart_title"].value = prompt.smart_title || "";
-  form.elements["intro"].value = prompt.intro || "";
-  form.elements["prompt"].value = prompt.prompt || "";
-  form.elements["category"].value = prompt.category || "";
-  form.elements["tags"].value = (prompt.tags || []).join(", ");
-  form.elements["tone"].value = prompt.tone || "";
-  form.elements["use_case"].value = prompt.use_case || "";
-  form.elements["skill_level"].value = prompt.skill_level || "";
-  form.elements["quality_score"].value = prompt.quality_score ?? 8;
-  form.elements["clarity"].value = prompt.clarity ?? 8;
-  form.elements["creativity"].value = prompt.creativity ?? 8;
-  form.elements["usefulness"].value = prompt.usefulness ?? 8;
-  form.elements["status"].value = prompt.status || "curated";
-
-  // Open modal
-  modalBackdrop.classList.remove("hidden");
-}
-
-/* ==========================================
-   SORTING CONTROLS
-========================================== */
-
-/**
- * Attach click handlers to all sortable header cells.
- */
-function setupSortingControls() {
-  const sortableHeaders = document.querySelectorAll("th.sortable");
-
-  sortableHeaders.forEach((header) => {
-    header.addEventListener("click", () => {
-      const column = header.dataset.column;
-
-      if (!column) return;
-
-      if (currentSort.column === column) {
-        currentSort.ascending = !currentSort.ascending;
-      } else {
-        currentSort.column = column;
-        currentSort.ascending = true;
-      }
-
-      loadPrompts();
-    });
-  });
-}
-
-/**
- * Update header labels with active ▲ / ▼ indicator.
- */
-function updateSortHeaderLabels() {
-  const sortableHeaders = document.querySelectorAll("th.sortable");
-
-  sortableHeaders.forEach((header) => {
-    const column = header.dataset.column;
-    const baseLabel = header.textContent.replace(/▲|▼/g, "").trim();
-
-    if (column === currentSort.column) {
-      const arrow = currentSort.ascending ? "▲" : "▼";
-      header.textContent = `${baseLabel} ${arrow}`;
-    } else {
-      header.textContent = `${baseLabel} ▲▼`;
-    }
-  });
-}
-
-/* ==========================================
-   MODAL CONTROLS (NEW + EDIT)
-========================================== */
-
-function setupModalControls() {
-  const modalBackdrop = document.getElementById("modal-backdrop");
-  const openButton = document.getElementById("add-prompt-btn");
-  const cancelButton = document.getElementById("cancel-modal");
-  const form = document.getElementById("new-prompt-form");
-  const warningsBox = document.getElementById("modal-warnings");
-  const modalTitle = document.getElementById("modal-title");
-
-  // Open modal for NEW prompt
-  openButton.addEventListener("click", () => {
-    // Reset form
-    form.reset();
-    form.elements["id"].value = "";
-    // Default scores
-    form.elements["quality_score"].value = 8;
-    form.elements["clarity"].value = 8;
-    form.elements["creativity"].value = 8;
-    form.elements["usefulness"].value = 8;
-    form.elements["status"].value = "curated";
-
-    // Title + warnings
-    modalTitle.textContent = "New Prompt";
-    warningsBox.classList.add("hidden");
-    warningsBox.innerHTML = "";
-
-    modalBackdrop.classList.remove("hidden");
-  });
-
-  // Close modal
-  cancelButton.addEventListener("click", () => {
-    modalBackdrop.classList.add("hidden");
-    warningsBox.classList.add("hidden");
-    warningsBox.innerHTML = "";
-    form.reset();
-  });
-
-  // Submit new or edited prompt
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    const formData = new FormData(form);
-
-    const id = (formData.get("id") || "").trim();
-
-    const fields = {
-      smart_title: (formData.get("smart_title") || "").trim(),
-      intro: (formData.get("intro") || "").trim(),
-      prompt: (formData.get("prompt") || "").trim(),
-      category: (formData.get("category") || "").trim(),
-      tags: cleanTags(formData.get("tags") || ""),
-      tone: (formData.get("tone") || "").trim(),
-      use_case: (formData.get("use_case") || "").trim(),
-      skill_level: (formData.get("skill_level") || "").trim(),
-      quality_score: Number(formData.get("quality_score") || 0),
-      clarity: Number(formData.get("clarity") || 0),
-      creativity: Number(formData.get("creativity") || 0),
-      usefulness: Number(formData.get("usefulness") || 0),
-      status: (formData.get("status") || "curated").trim(),
-    };
-
-    // Auto title if missing
-    if (!fields.smart_title) {
-      fields.smart_title = generateSmartTitle(fields.prompt);
-    }
-
-    // Validate
-    const warnings = validatePromptFields(fields);
-
-    if (warnings.length > 0) {
-      warningsBox.classList.remove("hidden");
-      warningsBox.innerHTML = warnings.join("<br>");
-      return;
-    } else {
-      warningsBox.classList.add("hidden");
-      warningsBox.innerHTML = "";
-    }
-
-    // Auto-score if needed
-    if (!fields.quality_score || fields.quality_score <= 0) {
-      const scores = autoScorePrompt(fields);
-      Object.assign(fields, scores);
-    }
-
-    let error;
-
-    if (id) {
-      // EDIT mode → update
-      const result = await supabase.from("prompts").update(fields).eq("id", id);
-      error = result.error;
-    } else {
-      // NEW mode → insert
-      const result = await supabase.from("prompts").insert(fields);
-      error = result.error;
-    }
+  try {
+    const { data, error } = await supabase
+      .from("prompts")
+      .select(
+        "id, smart_title, category, tags, status, quality_score, updated_at, model, clarity, creativity, usefulness"
+      )
+      .order("updated_at", { ascending: false });
 
     if (error) {
-      console.error("Error saving prompt via modal:", error);
-      alert("Error saving prompt. See console for details.");
+      console.error("Supabase load error:", error);
+      showToast("Error loading prompts. Check console.", "error");
       return;
     }
 
-    form.reset();
-    modalBackdrop.classList.add("hidden");
-
-    // Reload prompts after add/edit
-    await loadPrompts();
-  });
+    state.rows = data || [];
+    applyFiltersAndSort();
+  } catch (err) {
+    console.error("Load error:", err);
+    showToast("Error loading prompts. Check console.", "error");
+  }
 }
 
-/* ==========================================
-   INITIALIZE ADMIN CONSOLE
-========================================== */
+/* ------------------- Filtering & Sorting ------------------- */
 
-setupSortingControls();
-setupModalControls();
-loadPrompts();
+function applyFiltersAndSort() {
+  const query = state.searchQuery.trim().toLowerCase();
+  const statusFilterValue = state.statusFilter;
+
+  let rows = state.rows.slice();
+
+  // Filter by status
+  if (statusFilterValue !== "all") {
+    rows = rows.filter((row) => {
+      return normalizeStatus(row.status) === statusFilterValue;
+    });
+  }
+
+  // Filter by search
+  if (query) {
+    rows = rows.filter((row) => {
+      const title = (row.smart_title || "").toLowerCase();
+      const category = (row.category || "").toLowerCase();
+      const status = normalizeStatus(row.status);
+      const tags = joinTags(row.tags)
+        .join(", ")
+        .toLowerCase();
+
+      return (
+        title.includes(query) ||
+        category.includes(query) ||
+        status.includes(query) ||
+        tags.includes(query)
+      );
+    });
+  }
+
+  // Sort
+  const { sortKey, sortDirection } = state;
+  rows.sort((a, b) => {
+    const va = a[sortKey];
+    const vb = b[sortKey];
+
+    // Numeric-ish keys
+    if (
+      ["clarity", "creativity", "usefulness", "quality_score"].includes(
+        sortKey
+      )
+    ) {
+      const na = Number(va) || 0;
+      const nb = Number(vb) || 0;
+      return sortDirection === "asc" ? na - nb : nb - na;
+    }
+
+    // Date
+    if (sortKey === "updated_at") {
+      const da = va ? new Date(va).getTime() : 0;
+      const db = vb ? new Date(vb).getTime() : 0;
+      return sortDirection === "asc" ? da - db : db - da;
+    }
+
+    // String
+    const sa = (va || "").toString().toLowerCase();
+    const sb = (vb || "").toString().toLowerCase();
+    if (sa < sb) return sortDirection === "asc" ? -1 : 1;
+    if (sa > sb) return sortDirection === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  state.filteredRows = rows;
+  renderTable();
+}
+
+/* ------------------- Rendering ------------------- */
+
+function renderTable() {
+  const rows = state.filteredRows;
+  tableBody.innerHTML = "";
+
+  if (!rows.length) {
+    emptyStateEl.hidden = false;
+    rowCountEl.textContent = "0 prompts";
+    return;
+  }
+
+  emptyStateEl.hidden = true;
+  rowCountEl.textContent =
+    rows.length === 1 ? "1 prompt" : `${rows.length} prompts`;
+
+  const fragment = document.createDocumentFragment();
+
+  rows.forEach((row) => {
+    const tr = document.createElement("tr");
+    tr.dataset.id = row.id;
+
+    // Smart title
+    const tdTitle = document.createElement("td");
+    const titleSpan = document.createElement("span");
+    titleSpan.className = "cell-title";
+    titleSpan.textContent = row.smart_title || "Untitled prompt";
+
+    const subtitleSpan = document.createElement("span");
+    subtitleSpan.className = "cell-subtitle";
+    const status = row.status || "—";
+    const category = row.category || "—";
+    subtitleSpan.textContent = `${status} · ${category}`;
+
+    tdTitle.appendChild(titleSpan);
+    tdTitle.appendChild(subtitleSpan);
+
+    // Category
+    const tdCategory = document.createElement("td");
+    const cat = row.category || "—";
+    const catSpan = document.createElement("span");
+    catSpan.className = "category-pill";
+    catSpan.textContent = cat;
+    tdCategory.appendChild(catSpan);
+
+    // Tags
+    const tdTags = document.createElement("td");
+    const tagListDiv = document.createElement("div");
+    tagListDiv.className = "tag-list";
+    const tags = joinTags(row.tags);
+    if (tags.length) {
+      tags.forEach((t) => {
+        const chip = document.createElement("span");
+        chip.className = "tag-chip";
+        chip.textContent = t;
+        tagListDiv.appendChild(chip);
+      });
+    } else {
+      const empty = document.createElement("span");
+      empty.className = "cell-subtitle";
+      empty.textContent = "—";
+      tagListDiv.appendChild(empty);
+    }
+    tdTags.appendChild(tagListDiv);
+
+    // Model
+    const tdModel = document.createElement("td");
+    tdModel.textContent = row.model || "—";
+
+    // Clarity
+    const tdClarity = document.createElement("td");
+    tdClarity.className = "numeric";
+    tdClarity.textContent = formatNumber(row.clarity, 1);
+
+    // Creativity
+    const tdCreativity = document.createElement("td");
+    tdCreativity.className = "numeric";
+    tdCreativity.textContent = formatNumber(row.creativity, 1);
+
+    // Usefulness
+    const tdUsefulness = document.createElement("td");
+    tdUsefulness.className = "numeric";
+    tdUsefulness.textContent = formatNumber(row.usefulness, 1);
+
+    // Quality
+    const tdQuality = document.createElement("td");
+    tdQuality.className = "numeric";
+    tdQuality.textContent = formatNumber(row.quality_score, 1);
+
+    // Updated At
+    const tdUpdated = document.createElement("td");
+    tdUpdated.className = "numeric";
+    tdUpdated.textContent = formatDateShort(row.updated_at);
+
+    // Actions
+    const tdActions = document.createElement("td");
+    tdActions.className = "actions-cell";
+
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "btn btn-ghost-compact";
+    editBtn.textContent = "Edit";
+    editBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      goToEdit(row.id);
+    });
+
+    const statusBadgeSpan = document.createElement("span");
+    statusBadgeSpan.className = statusClass(row.status);
+    statusBadgeSpan.style.marginLeft = "6px";
+    statusBadgeSpan.textContent = (row.status || "unknown").toUpperCase();
+
+    tdActions.appendChild(editBtn);
+    tdActions.appendChild(statusBadgeSpan);
+
+    // Compose row
+    tr.appendChild(tdTitle);
+    tr.appendChild(tdCategory);
+    tr.appendChild(tdTags);
+    tr.appendChild(tdModel);
+    tr.appendChild(tdClarity);
+    tr.appendChild(tdCreativity);
+    tr.appendChild(tdUsefulness);
+    tr.appendChild(tdQuality);
+    tr.appendChild(tdUpdated);
+    tr.appendChild(tdActions);
+
+    // Row click → edit
+    tr.addEventListener("click", () => {
+      goToEdit(row.id);
+    });
+
+    fragment.appendChild(tr);
+  });
+
+  tableBody.appendChild(fragment);
+}
+
+/* ------------------- Navigation ------------------- */
+
+function goToEdit(id) {
+  if (!id) return;
+  window.location.href = `admin-edit.html?id=${encodeURIComponent(id)}`;
+}
+
+/* ------------------- Event Wiring ------------------- */
+
+function handleSearchInput(event) {
+  state.searchQuery = event.target.value || "";
+  applyFiltersAndSort();
+}
+
+function handleStatusFilter(event) {
+  state.statusFilter = event.target.value || "all";
+  applyFiltersAndSort();
+}
+
+function handleHeaderClick(event) {
+  const th = event.currentTarget;
+  const sortKey = th.dataset.sortKey;
+  if (!sortKey) return;
+
+  // Toggle direction if same column
+  if (state.sortKey === sortKey) {
+    state.sortDirection = state.sortDirection === "asc" ? "desc" : "asc";
+  } else {
+    state.sortKey = sortKey;
+    state.sortDirection = "asc";
+  }
+
+  // Update header sort classes
+  headerCells.forEach((cell) => {
+    cell.classList.remove("sort-asc", "sort-desc");
+  });
+  th.classList.add(
+    state.sortDirection === "asc" ? "sort-asc" : "sort-desc"
+  );
+
+  applyFiltersAndSort();
+}
+
+/* ------------------- Init ------------------- */
+
+function init() {
+  // Event listeners
+  searchInput.addEventListener("input", handleSearchInput);
+  statusFilter.addEventListener("change", handleStatusFilter);
+
+  headerCells.forEach((th) => {
+    th.addEventListener("click", handleHeaderClick);
+  });
+
+  // Initial sort indicator on Updated
+  headerCells.forEach((th) => {
+    const key = th.dataset.sortKey;
+    if (key === state.sortKey) {
+      th.classList.add(
+        state.sortDirection === "asc" ? "sort-asc" : "sort-desc"
+      );
+    }
+  });
+
+  loadPrompts();
+}
+
+document.addEventListener("DOMContentLoaded", init);
