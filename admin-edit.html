@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prompeii Admin Console — Edit Prompt</title>
+  <link rel="stylesheet" href="admin-edit.css" />
+</head>
+<body class="admin-body">
+  <!-- Header -->
+  <header class="admin-header">
+    <div>
+      <h1>Prompeii Admin Console</h1>
+      <p class="admin-subtitle">Edit an existing curated prompt.</p>
+    </div>
+
+    <div class="admin-actions">
+      <a href="admin.html" class="btn btn-ghost">&larr; Back to Prompt List</a>
+    </div>
+  </header>
+
+  <!-- Toast / notifications -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Main content -->
+  <main class="admin-main">
+    <section class="panel panel-edit">
+      <header class="panel-header">
+        <div>
+          <h2>Edit Prompt</h2>
+          <p class="panel-subtitle">Update metadata, scoring, and the master prompt.</p>
+        </div>
+        <div class="panel-actions">
+          <button id="btnCancel" type="button" class="btn btn-secondary">
+            Cancel
+          </button>
+          <button id="btnSave" type="button" class="btn btn-primary" disabled>
+            Save Changes
+          </button>
+        </div>
+      </header>
+
+      <form id="editPromptForm" class="edit-form" novalidate>
+        <!-- Top system bar -->
+        <section class="system-bar">
+          <div class="system-meta">
+            <span class="badge badge-status" id="statusBadge">Status: —</span>
+            <span class="system-item">
+              <span class="system-label">Prompt ID</span>
+              <span id="fieldPromptId" class="system-value">—</span>
+            </span>
+            <span class="system-item">
+              <span class="system-label">Version</span>
+              <span id="fieldVersion" class="system-value">—</span>
+            </span>
+          </div>
+          <div class="system-meta">
+            <span class="system-item">
+              <span class="system-label">Created</span>
+              <span id="fieldCreated" class="system-value">—</span>
+            </span>
+            <span class="system-item">
+              <span class="system-label">Last Updated</span>
+              <span id="fieldLastUpdated" class="system-value">—</span>
+            </span>
+            <span class="system-item">
+              <span class="system-label">Checksum</span>
+              <span id="fieldChecksum" class="system-value">—</span>
+            </span>
+          </div>
+        </section>
+
+        <div class="edit-layout">
+          <!-- LEFT COLUMN -->
+          <div class="edit-column">
+            <!-- SECTION: General Metadata -->
+            <section class="form-section">
+              <h3 class="section-title">General Metadata</h3>
+              <p class="section-description">
+                Core details used to organize and surface the prompt in Prompeii.
+              </p>
+
+              <div class="field-group">
+                <label for="smartTitleHuman" class="field-label">
+                  Smart Title (Human-readable) <span class="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="smartTitleHuman"
+                  name="smart_title_human"
+                  class="input"
+                  required
+                  maxlength="200"
+                  placeholder="e.g. Make ChatGPT sound naturally human"
+                />
+                <p class="field-hint">
+                  Short, descriptive, and scannable. Shown on cards.
+                </p>
+                <p class="field-error" data-error-for="smartTitleHuman"></p>
+              </div>
+
+              <div class="field-grid field-grid-2">
+                <div class="field-group">
+                  <label for="category" class="field-label">
+                    Category <span class="required">*</span>
+                  </label>
+                  <select id="category" name="category" class="input" required>
+                    <option value="">Select a category</option>
+                    <option value="Writing">Writing</option>
+                    <option value="Coding">Coding</option>
+                    <option value="Design">Design</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Productivity">Productivity</option>
+                    <option value="Education">Education</option>
+                    <option value="Research">Research</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <p class="field-hint">
+                    Used for high-level filtering on the Discover page.
+                  </p>
+                  <p class="field-error" data-error-for="category"></p>
+                </div>
+
+                <div class="field-group">
+                  <label for="status" class="field-label">
+                    Status <span class="required">*</span>
+                  </label>
+                  <select id="status" name="status" class="input" required>
+                    <option value="">Select status</option>
+                    <option value="published">Published</option>
+                    <option value="draft">Draft</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                  <p class="field-hint">
+                    Only published prompts appear in the public app.
+                  </p>
+                  <p class="field-error" data-error-for="status"></p>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="tags" class="field-label">Tags</label>
+                <input
+                  type="text"
+                  id="tags"
+                  name="tags"
+                  class="input"
+                  placeholder="e.g. email, tone-of-voice, outreach"
+                />
+                <p class="field-hint">
+                  Comma-separated list. Example: <code>email, tone, outreach</code>
+                </p>
+              </div>
+
+              <div class="field-grid field-grid-3">
+                <div class="field-group">
+                  <label for="tone" class="field-label">Tone</label>
+                  <select id="tone" name="tone" class="input">
+                    <option value="">—</option>
+                    <option value="casual">Casual</option>
+                    <option value="professional">Professional</option>
+                    <option value="playful">Playful</option>
+                    <option value="formal">Formal</option>
+                    <option value="technical">Technical</option>
+                  </select>
+                </div>
+
+                <div class="field-group">
+                  <label for="useCase" class="field-label">Use Case</label>
+                  <select id="useCase" name="use_case" class="input">
+                    <option value="">—</option>
+                    <option value="copywriting">Copywriting</option>
+                    <option value="ideation">Ideation</option>
+                    <option value="analysis">Analysis</option>
+                    <option value="brainstorming">Brainstorming</option>
+                    <option value="research">Research</option>
+                    <option value="coding">Coding</option>
+                  </select>
+                </div>
+
+                <div class="field-group">
+                  <label for="skillLevel" class="field-label">Skill Level</label>
+                  <select id="skillLevel" name="skill_level" class="input">
+                    <option value="">—</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field-grid field-grid-2">
+                <div class="field-group toggle-group">
+                  <label class="field-label">Curated</label>
+                  <label class="toggle">
+                    <input type="checkbox" id="isCurated" name="is_curated" />
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">Marked as curated</span>
+                  </label>
+                  <p class="field-hint">
+                    Curated prompts are highlighted in the public directory.
+                  </p>
+                </div>
+
+                <div class="field-group">
+                  <label for="popularityScore" class="field-label">
+                    Popularity Score
+                  </label>
+                  <input
+                    type="number"
+                    id="popularityScore"
+                    name="popularity_score"
+                    class="input"
+                    min="0"
+                    max="100"
+                    step="1"
+                  />
+                  <p class="field-hint">
+                    Optional. Used for ranking and experimentation.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <!-- SECTION: Quality Scoring -->
+            <section class="form-section">
+              <h3 class="section-title">Quality Scoring</h3>
+              <p class="section-description">
+                Internal scoring used to prioritize and explain why this prompt is featured.
+              </p>
+
+              <div class="field-grid field-grid-3">
+                <div class="field-group">
+                  <label for="clarity" class="field-label">Clarity</label>
+                  <input
+                    type="number"
+                    id="clarity"
+                    name="clarity"
+                    class="input"
+                    min="1"
+                    max="5"
+                    step="1"
+                  />
+                </div>
+                <div class="field-group">
+                  <label for="structure" class="field-label">Structure</label>
+                  <input
+                    type="number"
+                    id="structure"
+                    name="structure"
+                    class="input"
+                    min="1"
+                    max="5"
+                    step="1"
+                  />
+                </div>
+                <div class="field-group">
+                  <label for="originality" class="field-label">Originality</label>
+                  <input
+                    type="number"
+                    id="originality"
+                    name="originality"
+                    class="input"
+                    min="1"
+                    max="5"
+                    step="1"
+                  />
+                </div>
+              </div>
+
+              <div class="field-grid field-grid-3">
+                <div class="field-group">
+                  <label for="depth" class="field-label">Depth</label>
+                  <input
+                    type="number"
+                    id="depth"
+                    name="depth"
+                    class="input"
+                    min="1"
+                    max="5"
+                    step="1"
+                  />
+                </div>
+                <div class="field-group">
+                  <label for="usefulness" class="field-label">Usefulness</label>
+                  <input
+                    type="number"
+                    id="usefulness"
+                    name="usefulness"
+                    class="input"
+                    min="1"
+                    max="5"
+                    step="1"
+                  />
+                </div>
+                <div class="field-group">
+                  <label for="coherence" class="field-label">Coherence</label>
+                  <input
+                    type="number"
+                    id="coherence"
+                    name="coherence"
+                    class="input"
+                    min="1"
+                    max="5"
+                    step="1"
+                  />
+                </div>
+              </div>
+
+              <div class="field-grid field-grid-3">
+                <div class="field-group">
+                  <label for="creativity" class="field-label">Creativity</label>
+                  <input
+                    type="number"
+                    id="creativity"
+                    name="creativity"
+                    class="input"
+                    min="1"
+                    max="5"
+                    step="1"
+                  />
+                </div>
+                <div class="field-group">
+                  <label for="qualityScore" class="field-label">
+                    Quality Score (avg)
+                  </label>
+                  <input
+                    type="number"
+                    id="qualityScore"
+                    name="quality_score"
+                    class="input"
+                    min="1"
+                    max="5"
+                    step="0.1"
+                    readonly
+                  />
+                  <p class="field-hint">
+                    Automatically calculated from the dimensions above.
+                  </p>
+                </div>
+                <div class="field-group">
+                  <label for="prompeiiScore" class="field-label">
+                    Prompeii Score
+                  </label>
+                  <input
+                    type="number"
+                    id="prompeiiScore"
+                    name="prompeii_score"
+                    class="input"
+                    min="1"
+                    max="100"
+                    step="1"
+                  />
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="qualityNotes" class="field-label">Quality Notes</label>
+                <textarea
+                  id="qualityNotes"
+                  name="quality_notes"
+                  class="input textarea"
+                  rows="3"
+                  placeholder="Explain why this prompt is strong, and any caveats."
+                ></textarea>
+              </div>
+            </section>
+          </div>
+
+          <!-- RIGHT COLUMN -->
+          <div class="edit-column">
+            <!-- SECTION: Prompt Content -->
+            <section class="form-section">
+              <h3 class="section-title">Prompt Content</h3>
+              <p class="section-description">
+                The intro and master prompt that appear to users.
+              </p>
+
+              <div class="field-group">
+                <label for="intro" class="field-label">
+                  Intro <span class="required">*</span>
+                </label>
+                <textarea
+                  id="intro"
+                  name="intro"
+                  class="input textarea"
+                  rows="4"
+                  required
+                  placeholder="Short explanation of what this prompt does and when to use it."
+                ></textarea>
+                <p class="field-hint">
+                  Keep it friendly and specific. This shows above the prompt.
+                </p>
+                <p class="field-error" data-error-for="intro"></p>
+              </div>
+
+              <div class="field-group">
+                <label for="prompt" class="field-label">
+                  Prompt <span class="required">*</span>
+                </label>
+                <textarea
+                  id="prompt"
+                  name="prompt"
+                  class="input textarea textarea-code"
+                  rows="14"
+                  required
+                  placeholder="The exact text users will paste into their AI tool."
+                ></textarea>
+                <p class="field-hint">
+                  Use variables like <code>{{audience}}</code> or
+                  <code>{{topic}}</code> when helpful.
+                </p>
+                <p class="field-error" data-error-for="prompt"></p>
+              </div>
+
+              <div class="field-grid field-grid-2">
+                <div class="field-group toggle-group">
+                  <label class="field-label">Has Variables?</label>
+                  <label class="toggle">
+                    <input
+                      type="checkbox"
+                      id="hasVariables"
+                      name="has_variables"
+                    />
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">Prompt includes {{variables}}</span>
+                  </label>
+                  <p class="field-hint">
+                    Automatically detected, but you can override manually.
+                  </p>
+                </div>
+
+                <div class="field-group readonly-card">
+                  <div class="meta-row">
+                    <span class="meta-label">Detected Variables</span>
+                    <span id="detectedVariables" class="meta-value">—</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-label">Estimated Tokens</span>
+                    <span id="estimatedTokens" class="meta-value">—</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-label">Length Label</span>
+                    <span id="lengthLabel" class="meta-value">—</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- SECTION: Danger Zone -->
+            <section class="form-section danger-section">
+              <div class="danger-header">
+                <h3 class="section-title">Danger Zone</h3>
+                <p class="section-description">
+                  Delete this prompt from Prompeii. This action cannot be undone.
+                </p>
+              </div>
+              <button
+                id="btnDelete"
+                type="button"
+                class="btn btn-danger-outline"
+              >
+                Delete Prompt
+              </button>
+            </section>
+          </div>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <!-- Confirm modal -->
+  <div id="confirmModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-dialog" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h3 id="modalTitle">Discard changes?</h3>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessage">
+          You have unsaved changes. Are you sure you want to leave without saving?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="modalCancel">
+          Keep Editing
+        </button>
+        <button type="button" class="btn btn-danger" id="modalConfirm">
+          Yes, Continue
+        </button>
+      </div>
+    </div>
+  </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="admin-edit.js"></script>
+</body>
+</html>
