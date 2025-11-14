@@ -1,294 +1,214 @@
-/* -------------------------------------------------------------
-   Supabase config
-------------------------------------------------------------- */
+/* =========================================================
+   Prompeii Admin – Edit Page
+   ========================================================= */
+
 const SUPABASE_URL = "https://nbduzkycgklkptbefalu.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iZHV6a3ljZ2tsa3B0YmVmYWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4OTAxODMsImV4cCI6MjA3ODQ2NjE4M30.WR_Uah7Z8x_Tos6Nx8cjDo_q6e6c15xGDPOMGbb_RZ0";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iZHV6a3ljZ2tsa3B0YmVmYWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4OTAxODMsImV4cCI6MjA3ODQ2NjE4M30.WR_Uah7Z8x_Tos6Nx8cjDo_q6e6c15xGDPOMGbb_RZ0";
 
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+const supabaseEdit = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let currentPromptId = null;
+function $(id){ return document.getElementById(id); }
 
-/* -------------------------------------------------------------
-   DOM elements
-------------------------------------------------------------- */
-const toastEl = document.getElementById("toast");
+const saveBtn = $("saveBtn");
+const deleteBtn = $("deleteBtn");
+const duplicateBtn = $("duplicateBtn");
+const improveBtn = $("aiImproveBtn");
 
-function showToast(msg) {
-  toastEl.textContent = msg;
-  toastEl.classList.add("toast-visible");
-  setTimeout(() => toastEl.classList.remove("toast-visible"), 2000);
+// Inputs
+const smartTitle = $("smartTitle");
+const category = $("category");
+const statusEl = $("status");
+const tags = $("tags");
+const tone = $("tone");
+const useCase = $("useCase");
+const skillLevel = $("skillLevel");
+const model = $("model");
+
+const intro = $("intro");
+const promptTextarea = $("prompt");
+
+const clarity = $("clarity");
+const creativity = $("creativity");
+const usefulness = $("usefulness");
+const qualityScore = $("qualityScore");
+
+// Meta
+const metaId = $("metaId");
+const metaCreated = $("metaCreated");
+const metaUpdated = $("metaUpdated");
+
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("toast-visible");
+  setTimeout(() => t.classList.remove("toast-visible"), 1800);
 }
 
-/* -------------------------------------------------------------
-   Helpers
-------------------------------------------------------------- */
-
-function parseTags(value) {
-  if (!value) return [];
-  return value.split(",").map(t => t.trim()).filter(Boolean);
+/* -------------------------------------- */
+/* Get ID from URL */
+/* -------------------------------------- */
+function getId() {
+  const p = new URLSearchParams(window.location.search);
+  return p.get("id");
 }
 
-function detectVariables(prompt) {
-  if (!prompt) return [];
-  const m = prompt.match(/{{\s*[^}]+\s*}}/g);
-  return m ? [...new Set(m.map(x => x.trim()))] : [];
-}
-
-function estimateTokens(prompt) {
-  if (!prompt) return 0;
-  const words = prompt.trim().split(/\s+/).length;
-  return Math.round(words / 0.75);
-}
-
-function lengthLabel(tokens) {
-  if (tokens <= 80) return "Short";
-  if (tokens <= 260) return "Medium";
-  return "Long";
-}
-
-function avgQuality() {
-  const clarity = Number(document.getElementById("clarity").value);
-  const creativity = Number(document.getElementById("creativity").value);
-  const usefulness = Number(document.getElementById("usefulness").value);
-
-  const vals = [clarity, creativity, usefulness].filter(n => n > 0);
-  if (!vals.length) return null;
-
-  return Number((vals.reduce((a,b)=>a+b,0) / vals.length).toFixed(1));
-}
-
-/* -------------------------------------------------------------
-   Load Prompt
-------------------------------------------------------------- */
-
+/* -------------------------------------- */
+/* Load existing prompt */
+/* -------------------------------------- */
 async function loadPrompt() {
-  const params = new URLSearchParams(window.location.search);
-  currentPromptId = params.get("id");
+  const id = getId();
+  if (!id) return;
 
-  if (!currentPromptId) {
-    showToast("No prompt ID provided");
-    return;
-  }
-
-  const { data, error } = await supabase
+  const { data, error } = await supabaseEdit
     .from("prompts")
     .select("*")
-    .eq("id", currentPromptId)
+    .eq("id", id)
     .single();
 
-  if (error || !data) {
+  if (error) {
     console.error(error);
-    showToast("Error loading prompt");
+    toast("Load failed");
     return;
   }
 
-  // Fill metadata UI
-  document.getElementById("metaId").textContent = data.id;
-  document.getElementById("metaCreated").textContent =
-    data.created_at || "—";
-  document.getElementById("metaUpdated").textContent =
-    data.updated_at || "—";
+  metaId.textContent = data.id;
+  metaCreated.textContent = new Date(data.created_at).toLocaleString();
+  metaUpdated.textContent = new Date(data.updated_at).toLocaleString();
 
-  // Fill fields
-  document.getElementById("smartTitleHuman").value = data.smart_title || "";
-  document.getElementById("category").value = data.category || "";
-  document.getElementById("status").value = data.status || "";
-  document.getElementById("tags").value = (data.tags || []).join(", ");
+  smartTitle.value = data.smart_title || "";
+  category.value = data.category || "";
+  statusEl.value = data.status || "Draft";
+  tags.value = (data.tags || []).join(", ");
+  tone.value = data.tone || "";
+  useCase.value = data.use_case || "";
+  skillLevel.value = data.skill_level || "";
+  model.value = data.model || "";
+  intro.value = data.intro || "";
+  promptTextarea.value = data.prompt || "";
 
-  document.getElementById("tone").value = data.tone || "";
-  document.getElementById("useCase").value = data.use_case || "";
-  document.getElementById("skillLevel").value = data.skill_level || "";
-  document.getElementById("model").value = data.model || "";
-
-  document.getElementById("clarity").value = data.clarity ?? "";
-  document.getElementById("creativity").value = data.creativity ?? "";
-  document.getElementById("usefulness").value = data.usefulness ?? "";
-
-  document.getElementById("intro").value = data.intro || "";
-  document.getElementById("prompt").value = data.prompt || "";
-
-  document.getElementById("qualityScore").value =
-    data.quality_score ?? "";
-
-  // Update meta
-  const vars = detectVariables(data.prompt);
-  const tokens = estimateTokens(data.prompt);
-
-  document.getElementById("detectedVariables").textContent =
-    vars.length ? vars.join(", ") : "—";
-
-  document.getElementById("estimatedTokens").textContent = tokens;
-  document.getElementById("lengthLabel").textContent = lengthLabel(tokens);
+  clarity.value = data.clarity ?? "";
+  creativity.value = data.creativity ?? "";
+  usefulness.value = data.usefulness ?? "";
+  qualityScore.value = data.quality_score ?? "";
 }
 
-/* -------------------------------------------------------------
-   Save Prompt
-------------------------------------------------------------- */
-
+/* -------------------------------------- */
+/* Save */
+/* -------------------------------------- */
 async function savePrompt() {
-  if (!currentPromptId) return;
+  const id = getId();
+  if (!id) return;
 
-  const smart_title = document.getElementById("smartTitleHuman").value;
-  const category = document.getElementById("category").value;
-  const status = document.getElementById("status").value;
+  const { error } = await supabaseEdit
+    .from("prompts")
+    .update({
+      smart_title: smartTitle.value.trim(),
+      category: category.value,
+      status: statusEl.value,
+      tags: tags.value.split(",").map(t => t.trim()).filter(Boolean),
+      tone: tone.value.trim(),
+      use_case: useCase.value.trim(),
+      skill_level: skillLevel.value.trim(),
+      model: model.value.trim(),
+      intro: intro.value,
+      prompt: promptTextarea.value,
+      clarity: clarity.value === "" ? null : Number(clarity.value),
+      creativity: creativity.value === "" ? null : Number(creativity.value),
+      usefulness: usefulness.value === "" ? null : Number(usefulness.value),
+      quality_score: qualityScore.value === "" ? null : Number(qualityScore.value),
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", id);
 
-  const tags = parseTags(document.getElementById("tags").value);
+  if (error) {
+    toast("Save failed");
+    console.error(error);
+  } else {
+    toast("Saved!");
+    loadPrompt();
+  }
+}
 
-  const tone = document.getElementById("tone").value;
-  const use_case = document.getElementById("useCase").value;
-  const skill_level = document.getElementById("skillLevel").value;
-  const model = document.getElementById("model").value;
+/* -------------------------------------- */
+/* Duplicate */
+/* -------------------------------------- */
+async function duplicatePrompt() {
+  const id = getId();
+  if (!id) return;
 
-  const clarity = Number(document.getElementById("clarity").value) || null;
-  const creativity = Number(document.getElementById("creativity").value) || null;
-  const usefulness = Number(document.getElementById("usefulness").value) || null;
+  const { data } = await supabaseEdit
+    .from("prompts")
+    .select("*")
+    .eq("id", id)
+    .single();
 
-  const intro = document.getElementById("intro").value;
-  const prompt = document.getElementById("prompt").value;
-
-  const quality_score = avgQuality();
-
-  const payload = {
-    smart_title,
-    category,
-    status,
-    tags,
-    tone,
-    use_case,
-    skill_level,
-    model,
-    clarity,
-    creativity,
-    usefulness,
-    intro,
-    prompt,
-    quality_score,
-    updated_at: new Date().toISOString(),
+  const clone = {
+    ...data,
+    id: undefined,
+    smart_title: (data.smart_title || "Untitled") + " (Copy)",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   };
 
-  const { error } = await supabase
+  const { data: inserted, error } = await supabaseEdit
     .from("prompts")
-    .update(payload)
-    .eq("id", currentPromptId);
-
-  if (error) {
-    console.error(error);
-    showToast("Error saving prompt");
-    return;
-  }
-
-  showToast("Saved!");
-  loadPrompt(); // refresh metadata
-}
-
-/* -------------------------------------------------------------
-   Delete Prompt
-------------------------------------------------------------- */
-
-async function deletePrompt() {
-  if (!confirm("Delete this prompt? This cannot be undone.")) return;
-
-  const { error } = await supabase
-    .from("prompts")
-    .delete()
-    .eq("id", currentPromptId);
-
-  if (error) {
-    console.error(error);
-    showToast("Delete failed");
-    return;
-  }
-
-  showToast("Deleted");
-  window.location.href = "admin.html";
-}
-
-/* -------------------------------------------------------------
-   Duplicate Prompt  ← NEW
-------------------------------------------------------------- */
-
-async function duplicatePrompt() {
-  if (!currentPromptId) {
-    showToast("No prompt loaded.");
-    return;
-  }
-
-  // Load full record
-  const { data: original, error: loadErr } = await supabase
-    .from("prompts")
-    .select("*")
-    .eq("id", currentPromptId)
+    .insert(clone)
+    .select()
     .single();
 
-  if (loadErr || !original) {
-    console.error(loadErr);
-    showToast("Error loading original prompt.");
+  if (error) {
+    toast("Duplicate failed");
     return;
   }
 
-  // Remove auto fields
-  delete original.id;
-  delete original.created_at;
-  delete original.updated_at;
-
-  // Modify for duplication
-  original.smart_title = `Copy — ${original.smart_title}`;
-  original.status = "draft";
-  original.created_at = new Date().toISOString();
-  original.updated_at = new Date().toISOString();
-
-  // Insert clone
-  const { data: inserted, error: insertErr } = await supabase
-    .from("prompts")
-    .insert([original])
-    .select("id")
-    .single();
-
-  if (insertErr) {
-    console.error(insertErr);
-    showToast("Error duplicating prompt");
-    return;
-  }
-
-  showToast("Duplicated!");
-
-  // Redirect to Edit page for new prompt
   window.location.href = `admin-edit.html?id=${inserted.id}`;
 }
 
-/* -------------------------------------------------------------
-   Event Listeners
-------------------------------------------------------------- */
+/* -------------------------------------- */
+/* Delete */
+/* -------------------------------------- */
+async function deletePrompt() {
+  const id = getId();
+  if (!id) return;
 
-document.getElementById("btnSave").addEventListener("click", savePrompt);
-document.getElementById("btnDelete").addEventListener("click", deletePrompt);
-document.getElementById("btnDuplicate").addEventListener("click", duplicatePrompt);
+  if (!confirm("Delete this prompt permanently?")) return;
 
-document.getElementById("editPromptForm").addEventListener("input", e => {
-  const id = e.target.id;
+  await supabaseEdit
+    .from("prompts")
+    .delete()
+    .eq("id", id);
 
-  if (id === "prompt") {
-    const text = e.target.value;
-    const vars = detectVariables(text);
-    const tokens = estimateTokens(text);
+  window.location.href = "admin.html";
+}
 
-    document.getElementById("detectedVariables").textContent =
-      vars.length ? vars.join(", ") : "—";
+/* -------------------------------------- */
+/* AI Improve Prompt */
+/* -------------------------------------- */
+function improvePromptHandler() {
+  const original = promptTextarea.value.trim();
 
-    document.getElementById("estimatedTokens").textContent = tokens;
-    document.getElementById("lengthLabel").textContent = lengthLabel(tokens);
+  if (!original) {
+    toast("Write a prompt first.");
+    return;
   }
 
-  // Update quality score preview
-  if (["clarity", "creativity", "usefulness"].includes(id)) {
-    document.getElementById("qualityScore").value = avgQuality() ?? "";
-  }
-});
+  // temporary placeholder logic
+  const improved = original + "\n\n# AI Polish\n- More clear\n- More concise\n- Better flow";
 
-/* -------------------------------------------------------------
-   Init
-------------------------------------------------------------- */
-loadPrompt();
+  openImproveModal(original, improved, promptTextarea);
+}
+
+/* -------------------------------------- */
+/* Init */
+/* -------------------------------------- */
+function init() {
+  loadPrompt();
+
+  saveBtn.addEventListener("click", savePrompt);
+  duplicateBtn.addEventListener("click", duplicatePrompt);
+  deleteBtn.addEventListener("click", deletePrompt);
+  improveBtn.addEventListener("click", improvePromptHandler);
+}
+
+document.addEventListener("DOMContentLoaded", init);

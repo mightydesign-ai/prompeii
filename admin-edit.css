@@ -1,465 +1,359 @@
-/* --- Base layout --- */
-
-body.admin-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    "Segoe UI", sans-serif;
-  background-color: #0f0f0f;
-  color: #f8f8f8;
-}
-
-.admin-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 32px;
-  border-bottom: 1px solid #2e2e2e;
-  background: #121212;
-  position: sticky;
-  top: 0;
-  z-index: 20;
-}
-
-.admin-header h1 {
-  font-size: 20px;
-  margin: 0 0 4px;
-}
-
-.admin-subtitle {
-  margin: 0;
-  color: #b0b0b0;
-  font-size: 14px;
-}
-
-.admin-actions {
-  display: flex;
-  gap: 8px;
-}
-
-/* --- Buttons --- */
-
-.btn {
-  border: 1px solid transparent;
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 14px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: transparent;
-  color: #f8f8f8;
-}
-
-.btn-primary {
-  background: #ff3b30;
-  border-color: #ff3b30;
-  color: #ffffff;
-}
-
-.btn-primary:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.btn-primary:not(:disabled):hover {
-  background: #e1322a;
-  border-color: #e1322a;
-}
-
-.btn-secondary {
-  background: #2e2e2e;
-  border-color: #3a3a3a;
-  color: #f8f8f8;
-}
-
-.btn-secondary:hover {
-  background: #3a3a3a;
-}
-
-.btn-ghost {
-  border-color: transparent;
-  color: #f8f8f8;
-  background: transparent;
-}
-
-.btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.btn-danger {
-  background: #b00020;
-  border-color: #b00020;
-  color: #ffffff;
-}
-
-.btn-danger:hover {
-  background: #d00026;
-  border-color: #d00026;
-}
-
-.btn-danger-outline {
-  border-color: #b00020;
-  color: #ffb3c0;
-  background: transparent;
-}
-
-.btn-danger-outline:hover {
-  background: rgba(176, 0, 32, 0.16);
-}
-
-/* --- Toast --- */
-
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 24px;
-  min-width: 260px;
-  max-width: 340px;
-  padding: 12px 14px;
-  border-radius: 999px;
-  font-size: 14px;
-  background: #1c1c1c;
-  color: #f8f8f8;
-  border: 1px solid #2e2e2e;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
-  opacity: 0;
-  transform: translateY(12px);
-  pointer-events: none;
-  transition: opacity 0.18s ease-out, transform 0.18s ease-out;
-  z-index: 60;
-}
-
-.toast.toast-visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-/* --- Main / Panel --- */
-
-.admin-main {
-  padding: 24px 32px 40px;
-}
-
-.panel {
-  background: #141414;
-  border-radius: 18px;
-  border: 1px solid #262626;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-  padding: 20px 22px 24px;
-}
-
-.panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.panel-header h2 {
-  margin: 0 0 4px;
-  font-size: 18px;
-}
-
-.panel-subtitle {
-  margin: 0;
-  color: #a0a0a0;
-  font-size: 14px;
-}
-
-.panel-actions {
-  display: flex;
-  gap: 8px;
-}
-
-/* --- System bar --- */
-
-.system-bar {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: #181818;
-  border: 1px solid #262626;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.system-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.system-item {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 12px;
-}
-
-.system-label {
-  color: #868686;
-}
-
-.system-value {
-  color: #f8f8f8;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  border: 1px solid #2e2e2e;
-  background: #1b1b1b;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.badge-status.badge-published {
-  border-color: #0f9d58;
-  background: #062b19;
-  color: #8ff1bc;
-}
-
-.badge-status.badge-draft {
-  border-color: #f4b400;
-  background: #2b2405;
-  color: #ffe793;
-}
-
-.badge-status.badge-archived {
-  border-color: #5f6368;
-  background: #1f1f1f;
-  color: #d7d7d7;
-}
-
-/* --- Layout columns --- */
-
-.edit-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-  gap: 24px;
-}
-
-.edit-column {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-/* --- Form sections --- */
-
-.form-section {
-  padding: 16px 16px 18px;
-  border-radius: 14px;
-  border: 1px solid #262626;
-  background: radial-gradient(circle at top left, #1a1a1a, #101010);
-}
-
-.section-title {
-  margin: 0 0 4px;
-  font-size: 15px;
-}
-
-.section-description {
-  margin: 0 0 14px;
-  font-size: 13px;
-  color: #9a9a9a;
-}
-
-/* --- Fields --- */
-
-.field-group {
-  margin-bottom: 14px;
-}
-
-.field-label {
-  display: inline-block;
-  font-size: 13px;
-  margin-bottom: 4px;
-}
-
-.required {
-  color: #ff3b30;
-}
-
-.input {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #2e2e2e;
-  background: #111111;
-  color: #f8f8f8;
-  font-size: 14px;
-  box-sizing: border-box;
-}
-
-.input:focus {
-  outline: none;
-  border-color: #ff3b30;
-  box-shadow: 0 0 0 1px rgba(255, 59, 48, 0.6);
-}
-
-.input::placeholder {
-  color: #626262;
-}
-
-.input.input-error {
-  border-color: #ff3b30;
-}
-
-.textarea {
-  resize: vertical;
-  min-height: 80px;
-  line-height: 1.5;
-}
-
-.textarea-code {
-  font-family: "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono",
-    "Courier New", monospace;
-  white-space: pre-wrap;
-}
-
-/* Field grid */
-
-.field-grid {
-  display: grid;
-  gap: 12px;
-}
-
-.field-grid-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.field-grid-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-@media (max-width: 1040px) {
-  .edit-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-@media (max-width: 720px) {
-  .field-grid-2,
-  .field-grid-3 {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .admin-main {
-    padding: 16px 14px 28px;
-  }
-
-  .admin-header {
-    padding-inline: 16px;
-  }
-}
-
-/* Hints & errors */
-
-.field-hint {
-  margin: 4px 0 0;
-  font-size: 12px;
-  color: #8c8c8c;
-}
-
-.field-error {
-  margin: 2px 0 0;
-  font-size: 12px;
-  color: #ff6b6b;
-  display: none;
-}
-
-/* Readonly meta card */
-
-.readonly-card {
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: #141414;
-  border: 1px dashed #343434;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.meta-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-}
-
-.meta-label {
-  color: #aaaaaa;
-}
-
-.meta-value {
-  color: #f8f8f8;
-}
-
-/* Danger section */
-
-.danger-section {
-  border-color: #3b1016;
-  background: radial-gradient(circle at top left, #251016, #10070b);
-}
-
-.danger-header .section-title {
-  color: #ffb3c0;
-}
-
-/* Modal */
-
-.modal {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 80;
-}
-
-.modal.modal-open {
-  display: flex;
-}
-
-.modal-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-}
-
-.modal-dialog {
-  position: relative;
-  background: #151515;
-  border-radius: 16px;
-  border: 1px solid #2e2e2e;
-  padding: 16px 18px 14px;
-  width: 360px;
-  max-width: calc(100% - 32px);
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7);
-}
-
-.modal-header h3 {
-  margin: 0 0 4px;
-  font-size: 16px;
-}
-
-.modal-body p {
-  margin: 0 0 12px;
-  font-size: 14px;
-  color: #d0d0d0;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 4px;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prompeii Admin Console — Edit Prompt</title>
+  <link rel="stylesheet" href="admin-edit.css" />
+</head>
+
+<body class="admin-body">
+  <!-- Header -->
+  <header class="admin-header">
+    <div>
+      <h1>Prompeii Admin Console</h1>
+      <p class="admin-subtitle">Edit and refine curated prompts in your catalog.</p>
+    </div>
+
+    <div class="admin-actions">
+      <a href="admin.html" class="btn btn-ghost">&larr; Back to Prompt List</a>
+    </div>
+  </header>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Main -->
+  <main class="admin-main">
+    <section class="panel panel-edit">
+      <header class="panel-header">
+        <div>
+          <h2>Edit Prompt</h2>
+          <p class="panel-subtitle">Modify metadata, content, and quality settings.</p>
+        </div>
+
+        <div class="panel-actions">
+          <a href="admin.html" class="btn btn-secondary">Back</a>
+          <button id="btnDuplicate" class="btn btn-secondary">Duplicate</button>
+          <button id="btnSave" class="btn btn-primary">Save Changes</button>
+        </div>
+      </header>
+
+      <!-- System metadata -->
+      <section class="system-metadata">
+        <div class="meta-row">
+          <span class="meta-label">Prompt ID</span>
+          <span id="metaId">—</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Created</span>
+          <span id="metaCreated">—</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Updated</span>
+          <span id="metaUpdated">—</span>
+        </div>
+      </section>
+
+      <form id="editPromptForm" class="edit-form" novalidate>
+        <div class="edit-layout">
+          <!-- LEFT COLUMN -->
+          <div class="edit-column">
+            <!-- General Metadata -->
+            <section class="form-section">
+              <h3 class="section-title">General Metadata</h3>
+              <p class="section-description">
+                Core details used to organize and surface the prompt.
+              </p>
+
+              <div class="field-group">
+                <div class="field-header">
+                  <label for="smartTitleHuman" class="field-label">
+                    Smart Title <span class="required">*</span>
+                  </label>
+                  <button type="button" id="btnAiTitle" class="btn btn-ghost-compact">
+                    AI Title
+                  </button>
+                </div>
+                <input
+                  id="smartTitleHuman"
+                  class="input"
+                  required
+                  placeholder="e.g. Make ChatGPT sound naturally human"
+                />
+                <p class="field-hint">
+                  Short, descriptive, and scannable. Shown on cards.
+                </p>
+                <p class="field-error" data-error-for="smartTitleHuman"></p>
+              </div>
+
+              <div class="field-grid field-grid-2">
+                <div class="field-group">
+                  <label class="field-label">Category *</label>
+                  <select id="category" class="input" required>
+                    <option value="">Select a category</option>
+                    <option value="Writing">Writing</option>
+                    <option value="Coding">Coding</option>
+                    <option value="Design">Design</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Productivity">Productivity</option>
+                    <option value="Education">Education</option>
+                    <option value="Research">Research</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <p class="field-error" data-error-for="category"></p>
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label">Status *</label>
+                  <select id="status" class="input">
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <div class="field-header">
+                  <label class="field-label" for="tags">Tags</label>
+                  <button type="button" id="btnAiTags" class="btn btn-ghost-compact">
+                    AI Tags
+                  </button>
+                </div>
+                <input
+                  id="tags"
+                  class="input"
+                  placeholder="email, tone, outreach"
+                />
+                <p class="field-hint">Comma-separated. Saved as text[] array.</p>
+              </div>
+
+              <div class="field-grid field-grid-2">
+                <div class="field-group">
+                  <label class="field-label">Tone</label>
+                  <select id="tone" class="input">
+                    <option value="">—</option>
+                    <option value="casual">Casual</option>
+                    <option value="professional">Professional</option>
+                    <option value="playful">Playful</option>
+                    <option value="formal">Formal</option>
+                    <option value="technical">Technical</option>
+                  </select>
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label">Use Case</label>
+                  <select id="useCase" class="input">
+                    <option value="">—</option>
+                    <option value="copywriting">Copywriting</option>
+                    <option value="ideation">Ideation</option>
+                    <option value="analysis">Analysis</option>
+                    <option value="brainstorming">Brainstorming</option>
+                    <option value="research">Research</option>
+                    <option value="coding">Coding</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field-grid field-grid-2">
+                <div class="field-group">
+                  <label class="field-label">Skill Level</label>
+                  <select id="skillLevel" class="input">
+                    <option value="">—</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                  </select>
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label">Model</label>
+                  <input id="model" class="input" placeholder="gpt-4.1, gpt-5.1, claude-3.5" />
+                </div>
+              </div>
+            </section>
+
+            <!-- Quality -->
+            <section class="form-section">
+              <div class="section-header-row">
+                <h3 class="section-title">Quality Scoring</h3>
+                <button
+                  type="button"
+                  id="btnAiScore"
+                  class="btn btn-ghost-compact"
+                >
+                  AI Score
+                </button>
+              </div>
+              <p class="section-description">
+                Internal scoring used to prioritize and explain why this prompt is featured.
+              </p>
+
+              <div class="field-grid field-grid-3">
+                <div class="field-group">
+                  <label class="field-label">Clarity</label>
+                  <input id="clarity" type="number" min="1" max="5" class="input" />
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label">Creativity</label>
+                  <input id="creativity" type="number" min="1" max="5" class="input" />
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label">Usefulness</label>
+                  <input id="usefulness" type="number" min="1" max="5" class="input" />
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label">Quality Score (avg)</label>
+                <input id="qualityScore" class="input" readonly />
+                <p class="field-hint">Auto-calculated or set via AI scoring.</p>
+              </div>
+            </section>
+          </div>
+
+          <!-- RIGHT COLUMN -->
+          <div class="edit-column">
+            <section class="form-section">
+              <div class="field-group">
+                <div class="field-header">
+                  <label class="field-label" for="intro">
+                    Intro <span class="required">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    id="btnAiIntro"
+                    class="btn btn-ghost-compact"
+                  >
+                    AI Intro
+                  </button>
+                </div>
+                <textarea
+                  id="intro"
+                  rows="4"
+                  class="input textarea"
+                  required
+                ></textarea>
+                <p class="field-error" data-error-for="intro"></p>
+              </div>
+
+              <div class="field-group">
+                <div class="field-header">
+                  <label class="field-label" for="prompt">
+                    Prompt <span class="required">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    id="btnAiImprovePrompt"
+                    class="btn btn-ghost-compact"
+                  >
+                    Improve
+                  </button>
+                </div>
+                <textarea
+                  id="prompt"
+                  rows="16"
+                  class="input textarea textarea-code"
+                  required
+                ></textarea>
+                <p class="field-error" data-error-for="prompt"></p>
+              </div>
+
+              <div class="readonly-card">
+                <div class="meta-row">
+                  <span class="meta-label">Detected Variables</span>
+                  <span id="detectedVariables">—</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Estimated Tokens</span>
+                  <span id="estimatedTokens">—</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Length Label</span>
+                  <span id="lengthLabel">—</span>
+                </div>
+              </div>
+
+              <!-- PREVIEW PANEL -->
+              <section class="preview-panel">
+                <div class="preview-header">
+                  <h3 class="preview-title">Preview Output</h3>
+                  <button id="btnRunPreview" type="button" class="btn btn-primary">
+                    Run Prompt
+                  </button>
+                </div>
+
+                <div class="preview-vars">
+                  <p class="preview-vars-title">Variables</p>
+                  <div id="previewVarsContainer" class="preview-vars-list">
+                    <!-- auto-generated var inputs -->
+                  </div>
+                </div>
+
+                <div class="preview-output-container">
+                  <pre id="previewOutput" class="preview-output">
+Run the prompt to preview the result…
+                  </pre>
+                </div>
+
+                <div class="preview-controls">
+                  <button id="btnCopyPreview" type="button" class="btn btn-secondary">
+                    Copy Output
+                  </button>
+                </div>
+              </section>
+            </section>
+
+            <!-- Danger Zone -->
+            <section class="danger-zone">
+              <h3 class="danger-title">Danger Zone</h3>
+              <p class="danger-description">
+                Deleting this prompt is permanent. There is no undo.
+              </p>
+              <button id="btnDelete" type="button" class="btn btn-danger">
+                Delete Prompt
+              </button>
+            </section>
+          </div>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <!-- Improve Prompt Modal -->
+  <div id="improveModalOverlay" class="modal-overlay" hidden></div>
+  <div id="improveModal" class="modal-container" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">AI Improved Prompt</h2>
+        <button id="btnCloseImproveModal" type="button" class="modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="diff-columns">
+          <div class="diff-col">
+            <h3 class="diff-title">Original</h3>
+            <pre id="diffOriginal" class="diff-block"></pre>
+          </div>
+          <div class="diff-col">
+            <h3 class="diff-title">Improved</h3>
+            <pre id="diffImproved" class="diff-block"></pre>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnAcceptImproved" type="button" class="btn btn-primary">
+          Apply Changes
+        </button>
+        <button id="btnCancelImproved" type="button" class="btn btn-secondary">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="admin-edit.js"></script>
+</body>
+</html>

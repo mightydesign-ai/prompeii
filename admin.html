@@ -5,110 +5,75 @@
   <title>Prompeii Admin Console — Prompt List</title>
   <link rel="stylesheet" href="admin.css" />
 </head>
-<body class="admin-body">
+
+<body>
+
   <!-- Header -->
   <header class="admin-header">
     <div>
       <h1>Prompeii Admin Console</h1>
-      <p class="admin-subtitle">Browse, filter, and edit prompts in your catalog.</p>
+      <p class="admin-subtitle">Curate and manage your AI prompts.</p>
     </div>
-
-    <div class="admin-actions">
-      <a href="admin-create.html" class="btn btn-primary">
-        + New Prompt
-      </a>
-    </div>
+    <a href="admin-create.html" class="btn btn-primary">+ New Prompt</a>
   </header>
 
-  <!-- Toast / notifications -->
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <!-- Search & Filters -->
+  <section class="page-section">
+    <h2>Prompt List</h2>
 
-  <!-- Main content -->
-  <main class="admin-main">
-    <!-- Controls -->
-    <section class="toolbar">
-      <div class="toolbar-left">
-        <div class="search-group">
-          <input
-            type="search"
-            id="searchInput"
-            class="input search-input"
-            placeholder="Search by title, category, tag, status…"
-          />
-        </div>
+    <div class="inline-actions">
+      <input
+        id="searchInput"
+        class="input"
+        placeholder="Search prompts…"
+        style="width:240px;"
+      />
 
-        <div class="filter-group">
-          <label for="statusFilter" class="filter-label">Status</label>
-          <select id="statusFilter" class="input filter-input">
-            <option value="all">All</option>
-            <option value="published">Published</option>
-            <option value="draft">Draft</option>
-            <option value="archived">Archived</option>
-          </select>
-        </div>
+      <select id="statusFilter" class="select">
+        <option value="all">All statuses</option>
+        <option value="draft">Draft</option>
+        <option value="curated">Curated</option>
+        <option value="archived">Archived</option>
+      </select>
+
+      <div id="rowCount" style="margin-left:auto; font-size:14px; color:#6b7280;">
+        —
       </div>
+    </div>
+  </section>
 
-      <div class="toolbar-right">
-        <span id="rowCount" class="row-count">0 prompts</span>
-      </div>
-    </section>
+  <!-- Table -->
+  <div class="table-container">
+    <table class="table prompt-table">
+      <thead>
+        <tr>
+          <th class="sortable" data-sort-key="smart_title">Title</th>
+          <th class="sortable" data-sort-key="category">Category</th>
+          <th>Tags</th>
+          <th class="sortable" data-sort-key="model">Model</th>
+          <th class="sortable" data-sort-key="clarity">Clarity</th>
+          <th class="sortable" data-sort-key="creativity">Creativity</th>
+          <th class="sortable" data-sort-key="usefulness">Usefulness</th>
+          <th class="sortable" data-sort-key="quality_score">Quality</th>
+          <th class="sortable" data-sort-key="updated_at">Updated</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="promptTableBody"></tbody>
+    </table>
 
-    <!-- Table -->
-    <section class="table-section">
-      <div class="table-card">
-        <table class="prompt-table">
-          <thead>
-            <tr>
-              <th data-sort-key="smart_title" class="sortable">
-                Smart Title
-                <span class="sort-indicator"></span>
-              </th>
-              <th data-sort-key="category" class="sortable">
-                Category
-                <span class="sort-indicator"></span>
-              </th>
-              <th>Tags</th>
-              <th data-sort-key="model" class="sortable">
-                Model
-                <span class="sort-indicator"></span>
-              </th>
-              <th data-sort-key="clarity" class="sortable numeric">
-                Clarity
-                <span class="sort-indicator"></span>
-              </th>
-              <th data-sort-key="creativity" class="sortable numeric">
-                Creativity
-                <span class="sort-indicator"></span>
-              </th>
-              <th data-sort-key="usefulness" class="sortable numeric">
-                Usefulness
-                <span class="sort-indicator"></span>
-              </th>
-              <th data-sort-key="quality_score" class="sortable numeric">
-                Quality
-                <span class="sort-indicator"></span>
-              </th>
-              <th data-sort-key="updated_at" class="sortable numeric">
-                Updated
-                <span class="sort-indicator"></span>
-              </th>
-              <th><!-- Actions column --></th>
-            </tr>
-          </thead>
-          <tbody id="promptTableBody">
-            <!-- Rows injected by JS -->
-          </tbody>
-        </table>
+    <div id="emptyState" style="display:none; text-align:center; padding:20px;">
+      No prompts found.
+    </div>
+  </div>
 
-        <div id="emptyState" class="empty-state" hidden>
-          <p>No prompts found. Try adjusting your search or filters.</p>
-        </div>
-      </div>
-    </section>
-  </main>
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
 
-  <!-- Supabase + page logic -->
+  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Page logic -->
   <script src="admin.js"></script>
 </body>
 </html>

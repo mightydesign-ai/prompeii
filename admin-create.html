@@ -2,218 +2,183 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Prompeii Admin Console — Create Prompt</title>
-  <link rel="stylesheet" href="admin-edit.css" />
+  <title>Create Prompt — Prompeii Admin</title>
+  <link rel="stylesheet" href="admin.css" />
 </head>
 
-<body class="admin-body">
+<body>
+
   <!-- Header -->
   <header class="admin-header">
     <div>
       <h1>Prompeii Admin Console</h1>
-      <p class="admin-subtitle">Add a new curated prompt to your catalog.</p>
+      <p class="admin-subtitle">Add a brand-new curated prompt.</p>
     </div>
-
-    <div class="admin-actions">
-      <a href="admin.html" class="btn btn-ghost">&larr; Back to Prompt List</a>
-    </div>
+    <a href="admin.html" class="back-link">← Back to List</a>
   </header>
 
-  <!-- Toast -->
-  <div id="toast" class="toast" role="status"></div>
+  <!-- Section -->
+  <section class="page-section">
+    <h2>Create Prompt</h2>
 
-  <!-- Main -->
-  <main class="admin-main">
-    <section class="panel panel-edit">
-      <header class="panel-header">
-        <div>
-          <h2>Create New Prompt</h2>
-          <p class="panel-subtitle">Define metadata and write your prompt.</p>
-        </div>
-        <div class="panel-actions">
-          <a href="admin.html" class="btn btn-secondary">Cancel</a>
-          <button id="btnCreate" class="btn btn-primary">
-            Create Prompt
-          </button>
-        </div>
-      </header>
+    <div class="inline-actions">
+      <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
+      <button id="createBtn" class="btn btn-primary">Create</button>
+    </div>
+  </section>
 
-      <form id="createPromptForm" class="edit-form" novalidate>
-        <div class="edit-layout">
+  <div class="two-column">
 
-          <!-- LEFT COLUMN -->
-          <div class="edit-column">
+    <!-- LEFT -->
+    <div class="column">
+      <div class="card">
+        <h3>General Metadata</h3>
 
-            <!-- General Metadata -->
-            <section class="form-section">
-              <h3 class="section-title">General Metadata</h3>
-              <p class="section-description">
-                Core details used to organize and surface the prompt.
-              </p>
+        <label class="field-label">
+          Smart Title *
+          <button id="aiTitleBtn" class="btn-ghost-compact" type="button">AI Title</button>
+        </label>
+        <input id="smartTitle" class="input" />
 
-              <div class="field-group">
-                <label for="smartTitleHuman" class="field-label">
-                  Smart Title <span class="required">*</span>
-                </label>
-                <input
-                  id="smartTitleHuman"
-                  class="input"
-                  required
-                  placeholder="e.g. Make ChatGPT sound naturally human" />
-                <p class="field-error" data-error-for="smartTitleHuman"></p>
-              </div>
+        <label class="field-label">Category *</label>
+        <select id="category" class="select">
+          <option value="">Select a category</option>
+          <option>Writing</option>
+          <option>Marketing</option>
+          <option>Development</option>
+        </select>
 
-              <div class="field-grid field-grid-2">
-                <div class="field-group">
-                  <label class="field-label">Category *</label>
-                  <select id="category" class="input" required>
-                    <option value="">Select a category</option>
-                    <option value="Writing">Writing</option>
-                    <option value="Coding">Coding</option>
-                    <option value="Design">Design</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Productivity">Productivity</option>
-                    <option value="Education">Education</option>
-                    <option value="Research">Research</option>
-                    <option value="Other">Other</option>
-                  </select>
-                  <p class="field-error" data-error-for="category"></p>
-                </div>
+        <label class="field-label">Status *</label>
+        <select id="status" class="select">
+          <option>Draft</option>
+          <option>Curated</option>
+          <option>Archived</option>
+        </select>
 
-                <div class="field-group">
-                  <label class="field-label">Status *</label>
-                  <select id="status" class="input">
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                </div>
-              </div>
+        <label class="field-label">
+          Tags
+          <button id="aiTagsBtn" class="btn-ghost-compact" type="button">AI Tags</button>
+        </label>
+        <input id="tags" class="input" placeholder="comma,separated" />
+        <p class="field-hint">Tags saved as text[]</p>
 
-              <div class="field-group">
-                <label class="field-label">Tags</label>
-                <input
-                  id="tags"
-                  class="input"
-                  placeholder="email, tone, outreach" />
-                <p class="field-hint">Comma-separated. Saved as a text[] array.</p>
-              </div>
-
-              <div class="field-grid field-grid-2">
-                <div class="field-group">
-                  <label class="field-label">Tone</label>
-                  <select id="tone" class="input">
-                    <option value="">—</option>
-                    <option value="casual">Casual</option>
-                    <option value="professional">Professional</option>
-                    <option value="playful">Playful</option>
-                    <option value="formal">Formal</option>
-                    <option value="technical">Technical</option>
-                  </select>
-                </div>
-
-                <div class="field-group">
-                  <label class="field-label">Use Case</label>
-                  <select id="useCase" class="input">
-                    <option value="">—</option>
-                    <option value="copywriting">Copywriting</option>
-                    <option value="ideation">Ideation</option>
-                    <option value="analysis">Analysis</option>
-                    <option value="brainstorming">Brainstorming</option>
-                    <option value="research">Research</option>
-                    <option value="coding">Coding</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="field-grid field-grid-2">
-                <div class="field-group">
-                  <label class="field-label">Skill Level</label>
-                  <select id="skillLevel" class="input">
-                    <option value="">—</option>
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                  </select>
-                </div>
-
-                <div class="field-group">
-                  <label class="field-label">Model</label>
-                  <input id="model" class="input" placeholder="gpt-5.1, claude-3.5" />
-                </div>
-              </div>
-            </section>
-
-            <!-- Quality -->
-            <section class="form-section">
-              <h3 class="section-title">Quality Scoring</h3>
-              <div class="field-grid field-grid-3">
-                <div class="field-group">
-                  <label class="field-label">Clarity</label>
-                  <input id="clarity" type="number" min="1" max="5" class="input" />
-                </div>
-
-                <div class="field-group">
-                  <label class="field-label">Creativity</label>
-                  <input id="creativity" type="number" min="1" max="5" class="input" />
-                </div>
-
-                <div class="field-group">
-                  <label class="field-label">Usefulness</label>
-                  <input id="usefulness" type="number" min="1" max="5" class="input" />
-                </div>
-              </div>
-
-              <div class="field-group">
-                <label class="field-label">Quality Score (avg)</label>
-                <input id="qualityScore" class="input" readonly />
-                <p class="field-hint">Auto-calculated from clarity, creativity, and usefulness.</p>
-              </div>
-            </section>
-
+        <div class="form-grid-3">
+          <div>
+            <label class="field-label">Tone</label>
+            <select id="tone" class="select">
+              <option>—</option>
+              <option>Casual</option>
+              <option>Formal</option>
+            </select>
           </div>
 
-          <!-- RIGHT COLUMN -->
-          <div class="edit-column">
-            <!-- Prompt Content -->
-            <section class="form-section">
-              <h3 class="section-title">Prompt Content</h3>
-
-              <div class="field-group">
-                <label class="field-label">Intro *</label>
-                <textarea id="intro" rows="4" class="input textarea" required></textarea>
-                <p class="field-error" data-error-for="intro"></p>
-              </div>
-
-              <div class="field-group">
-                <label class="field-label">Prompt *</label>
-                <textarea id="prompt" rows="14" class="input textarea textarea-code" required></textarea>
-                <p class="field-error" data-error-for="prompt"></p>
-              </div>
-
-              <div class="readonly-card">
-                <div class="meta-row">
-                  <span class="meta-label">Detected Variables</span>
-                  <span id="detectedVariables">—</span>
-                </div>
-                <div class="meta-row">
-                  <span class="meta-label">Estimated Tokens</span>
-                  <span id="estimatedTokens">—</span>
-                </div>
-                <div class="meta-row">
-                  <span class="meta-label">Length Label</span>
-                  <span id="lengthLabel">—</span>
-                </div>
-              </div>
-            </section>
+          <div>
+            <label class="field-label">Use Case</label>
+            <select id="useCase" class="select">
+              <option>—</option>
+              <option>Copywriting</option>
+              <option>Brainstorming</option>
+              <option>Summaries</option>
+            </select>
           </div>
 
+          <div>
+            <label class="field-label">Skill Level</label>
+            <select id="skillLevel" class="select">
+              <option>—</option>
+              <option>Beginner</option>
+              <option>Intermediate</option>
+              <option>Advanced</option>
+            </select>
+          </div>
         </div>
-      </form>
-    </section>
-  </main>
 
+        <label class="field-label">Model</label>
+        <input id="model" class="input" placeholder="gpt-5.1, claude-3.5" />
+
+      </div>
+
+      <div class="card">
+        <h3>Quality Scoring</h3>
+
+        <div class="form-grid-4">
+          <div>
+            <label class="field-label">Clarity</label>
+            <input id="clarity" class="input" type="number" step="0.1" />
+          </div>
+          <div>
+            <label class="field-label">Creativity</label>
+            <input id="creativity" class="input" type="number" step="0.1" />
+          </div>
+          <div>
+            <label class="field-label">Usefulness</label>
+            <input id="usefulness" class="input" type="number" step="0.1" />
+          </div>
+          <div>
+            <label class="field-label">Quality Score</label>
+            <input id="qualityScore" class="input" type="number" step="0.1" />
+          </div>
+        </div>
+      </div>
+    </div><!-- left -->
+
+    <!-- RIGHT -->
+    <div class="column">
+      <div class="card">
+        <label class="field-label">
+          Intro *
+          <button id="aiIntroBtn" class="btn-ghost-compact" type="button">AI Intro</button>
+        </label>
+        <textarea id="intro" rows="6" class="textarea"></textarea>
+      </div>
+
+      <div class="card">
+        <label class="field-label">
+          Prompt *
+          <button id="aiImproveBtn" class="btn-ghost-compact" type="button">Improve</button>
+        </label>
+        <textarea id="prompt" rows="20" class="textarea"></textarea>
+      </div>
+    </div><!-- right -->
+
+  </div><!-- two-column -->
+
+  <div id="toast" class="toast"></div>
+
+  <!-- Modal -->
+  <div id="improveModalOverlay" class="modal-overlay" style="display:none;"></div>
+
+  <div id="improveModalContainer" class="modal-container" style="display:none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">AI Improved Prompt</h3>
+        <button id="improveCloseBtn" class="modal-close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="diff-columns">
+          <div>
+            <div class="diff-title">Original</div>
+            <pre id="improveOriginal" class="diff-block"></pre>
+          </div>
+          <div>
+            <div class="diff-title">Improved</div>
+            <pre id="improveImproved" class="diff-block"></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="improveCancelBtn" class="btn btn-secondary">Cancel</button>
+        <button id="improveApplyBtn" class="btn btn-primary">Apply Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="modal.js"></script>
   <script src="admin-create.js"></script>
+
 </body>
 </html>

@@ -1,181 +1,121 @@
-// --- Supabase config ---
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_ANON_KEY = "YOUR_ANON_KEY";
+/* =========================================================
+   Prompeii Admin – Create Page
+   ========================================================= */
 
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+const SUPABASE_URL = "https://nbduzkycgklkptbefalu.supabase.co";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iZHV6a3ljZ2tsa3B0YmVmYWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4OTAxODMsImV4cCI6MjA3ODQ2NjE4M30.WR_Uah7Z8x_Tos6Nx8cjDo_q6e6c15xGDPOMGbb_RZ0";
 
-// DOM
-const form = document.getElementById("createPromptForm");
-const btnCreate = document.getElementById("btnCreate");
-const toastEl = document.getElementById("toast");
+const supabaseCreate = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const detectedVariablesEl = document.getElementById("detectedVariables");
-const estimatedTokensEl = document.getElementById("estimatedTokens");
-const lengthLabelEl = document.getElementById("lengthLabel");
+function q(id) { return document.getElementById(id); }
 
-/* ------------------- Helpers ------------------- */
+const createBtn = q("createBtn");
+const cancelBtn = q("cancelBtn");
 
-function showToast(msg) {
-  toastEl.textContent = msg;
-  toastEl.classList.add("toast-visible");
-  setTimeout(() => toastEl.classList.remove("toast-visible"), 2000);
+const smartTitle = q("smartTitle");
+const category = q("category");
+const statusEl = q("status");
+const tags = q("tags");
+const tone = q("tone");
+const useCase = q("useCase");
+const skillLevel = q("skillLevel");
+const model = q("model");
+
+const intro = q("intro");
+const promptTextarea = q("prompt");
+
+const clarity = q("clarity");
+const creativity = q("creativity");
+const usefulness = q("usefulness");
+const qualityScore = q("qualityScore");
+
+function toast(msg) {
+  const t = q("toast");
+  t.textContent = msg;
+  t.classList.add("toast-visible");
+  setTimeout(() => t.classList.remove("toast-visible"), 1800);
 }
 
-function parseTags(value) {
-  if (!value) return [];
-  return value.split(",").map(t => t.trim()).filter(Boolean);
-}
-
-function detectVariables(prompt) {
-  if (!prompt) return [];
-  const m = prompt.match(/{{\s*[^}]+\s*}}/g);
-  return m ? [...new Set(m.map(x => x.trim()))] : [];
-}
-
-function estimateTokens(prompt) {
-  if (!prompt) return 0;
-  const words = prompt.trim().split(/\s+/).length;
-  return Math.round(words / 0.75);
-}
-
-function lengthLabel(tokens) {
-  if (tokens <= 80) return "Short";
-  if (tokens <= 260) return "Medium";
-  return "Long";
-}
-
-function avgQuality() {
-  const clarity = Number(document.getElementById("clarity").value);
-  const creativity = Number(document.getElementById("creativity").value);
-  const usefulness = Number(document.getElementById("usefulness").value);
-
-  const vals = [clarity, creativity, usefulness].filter(n => n > 0);
-  if (!vals.length) return null;
-
-  return Number((vals.reduce((a,b)=>a+b,0) / vals.length).toFixed(1));
-}
-
-function validateForm() {
-  let valid = true;
-
-  const required = [
-    { id: "smartTitleHuman", label: "Smart Title" },
-    { id: "category", label: "Category" },
-    { id: "intro", label: "Intro" },
-    { id: "prompt", label: "Prompt" },
-  ];
-
-  required.forEach(field => {
-    const el = document.getElementById(field.id);
-    const err = document.querySelector(`[data-error-for="${field.id}"]`);
-
-    if (!el.value.trim()) {
-      err.textContent = `${field.label} is required.`;
-      err.style.display = "block";
-      el.classList.add("input-error");
-      valid = false;
-    } else {
-      err.textContent = "";
-      err.style.display = "none";
-      el.classList.remove("input-error");
-    }
-  });
-
-  return valid;
-}
-
-/* ------------------- Create ------------------- */
-
+/* ------------------------------------------------------
+   Create
+------------------------------------------------------ */
 async function createPrompt() {
-  if (!validateForm()) return;
-
-  const smart_title = document.getElementById("smartTitleHuman").value;
-  const category = document.getElementById("category").value;
-  const status = document.getElementById("status").value;
-
-  const tags = parseTags(document.getElementById("tags").value);
-  const tone = document.getElementById("tone").value;
-  const use_case = document.getElementById("useCase").value;
-  const skill_level = document.getElementById("skillLevel").value;
-  const model = document.getElementById("model").value;
-
-  const clarity = Number(document.getElementById("clarity").value) || null;
-  const creativity = Number(document.getElementById("creativity").value) || null;
-  const usefulness = Number(document.getElementById("usefulness").value) || null;
-
-  const intro = document.getElementById("intro").value;
-  const prompt = document.getElementById("prompt").value;
-
-  const quality_score = avgQuality();
-
-  const now = new Date().toISOString();
+  if (!smartTitle.value.trim()) {
+    toast("Smart title required");
+    return;
+  }
+  if (!category.value) {
+    toast("Category required");
+    return;
+  }
 
   const payload = {
-    smart_title,
-    category,
-    status,
-    tags,
-    tone,
-    use_case,
-    skill_level,
-    model,
-    clarity,
-    creativity,
-    usefulness,
-    intro,
-    prompt,
-    quality_score,
-    created_at: now,
-    updated_at: now,
+    smart_title: smartTitle.value.trim(),
+    category: category.value,
+    status: statusEl.value,
+    tags: tags.value.split(",").map(t => t.trim()).filter(Boolean),
+    tone: tone.value.trim(),
+    use_case: useCase.value.trim(),
+    skill_level: skillLevel.value.trim(),
+    model: model.value.trim(),
+    intro: intro.value,
+    prompt: promptTextarea.value,
+    clarity: clarity.value === "" ? null : Number(clarity.value),
+    creativity: creativity.value === "" ? null : Number(creativity.value),
+    usefulness: usefulness.value === "" ? null : Number(usefulness.value),
+    quality_score: qualityScore.value === "" ? null : Number(qualityScore.value),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   };
 
-  btnCreate.disabled = true;
-  btnCreate.textContent = "Creating…";
-
-  const { data, error } = await supabase
+  const { data, error } = await supabaseCreate
     .from("prompts")
-    .insert([payload])
-    .select("id")
+    .insert(payload)
+    .select()
     .single();
 
   if (error) {
     console.error(error);
-    showToast("Error creating prompt.");
-    btnCreate.disabled = false;
-    btnCreate.textContent = "Create Prompt";
+    toast("Create failed");
     return;
   }
 
-  showToast("Prompt created!");
-
-  // Redirect to edit page
+  toast("Created!");
   window.location.href = `admin-edit.html?id=${data.id}`;
 }
 
-/* ------------------- Events ------------------- */
+/* ------------------------------------------------------
+   AI Improve (placeholder)
+------------------------------------------------------ */
+function improvePromptHandler() {
+  const original = promptTextarea.value.trim();
 
-btnCreate.addEventListener("click", createPrompt);
-
-form.addEventListener("input", (e) => {
-  const id = e.target.id;
-
-  // Update meta values if prompt changed
-  if (id === "prompt") {
-    const p = e.target.value;
-    const vars = detectVariables(p);
-    const tokens = estimateTokens(p);
-
-    detectedVariablesEl.textContent = vars.length ? vars.join(", ") : "—";
-    estimatedTokensEl.textContent = tokens;
-    lengthLabelEl.textContent = lengthLabel(tokens);
+  if (!original) {
+    toast("Write a prompt first.");
+    return;
   }
 
-  // Update quality score preview
-  if (["clarity", "creativity", "usefulness"].includes(id)) {
-    const q = avgQuality();
-    document.getElementById("qualityScore").value = q ?? "";
-  }
-});
+  const improved = original + "\n\n# AI Polish\n- Cleaner\n- More clear\n- More direct";
+
+  openImproveModal(original, improved, promptTextarea);
+}
+
+/* ------------------------------------------------------
+   Cancel
+------------------------------------------------------ */
+function cancel() {
+  window.location.href = "admin.html";
+}
+
+/* ------------------------------------------------------
+   Init
+------------------------------------------------------ */
+function init() {
+  createBtn.addEventListener("click", createPrompt);
+  cancelBtn.addEventListener("click", cancel);
+
+  q("aiImproveBtn").addEventListener("click", improvePromptHandler);
+}
+
+document.addEventListener("DOMContentLoaded", init);
