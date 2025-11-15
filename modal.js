@@ -1,53 +1,119 @@
-window.addEventListener("error", function (e) {
-  console.error("🔥 Global Error Caught:", e.message, e);
-  toast("Something went wrong — check console.");
-});
+// =============================================================
+// Prompeii — Improve Modal System (GLOBAL SAFE VERSION)
+// =============================================================
+//
+// This script must be loaded AFTER:
+//   - global toast is defined
+//   - global supabase client is defined (optional here)
+//
+// This file registers a global object:
+//   window.PrompeiiImproveModal = { showImproveModal, modalContainer }
+//
+// The admin-edit.js and admin-create.js pages hook into this.
+//
+// =============================================================
 
-window.addEventListener("unhandledrejection", function (e) {
-  console.error("🔥 Promise Error:", e.reason);
-  toast("Unexpected error — check console.");
-});
+console.log("[Prompeii] modal.js loaded");
 
-// modal.js — resilient ID binding (supports both legacy and advanced editor IDs)
-
-function pick(...ids) {
-  for (const id of ids) {
-    const el = document.getElementById(id);
-    if (el) return el;
-  }
-  return null;
+function $(id) {
+  return document.getElementById(id);
 }
 
-const modalContainer = pick("improveModalContainer", "improveModal"); // advanced likely uses "improveModal"
-const originalEl     = pick("improveOriginal", "diffOriginal", "originalText");
-const improvedEl     = pick("improveImproved", "diffImproved", "improvedText");
-const closeBtn       = pick("improveCloseBtn", "btnCloseImproveModal", "closeImprove");
-const cancelBtn      = pick("improveCancelBtn", "btnCancelImproved", "cancelImprove");
-const applyBtn       = pick("improveApplyBtn", "btnAcceptImproved", "applyImprove");
+// ----- DOM ELEMENTS -----
+const modalContainer = $("improveModal");
+const diffOriginal = $("diffOriginal");
+const diffImproved = $("diffImproved");
 
-if (!modalContainer || !originalEl || !improvedEl || !closeBtn || !cancelBtn || !applyBtn) {
-  console.warn("Improve modal: Missing required elements. Modal disabled.");
+const btnApply = $("btnAcceptImproved");
+const btnCancel = $("btnCancelImproved");
+const btnCloseX = $("btnCloseImproveModal");
+
+// Safety: if page does not include modal, bail out
+if (!modalContainer) {
+  console.warn("[Prompeii] Improve Modal not found on this page.");
 } else {
-  function showImproveModal(originalText, improvedText = "") {
-    originalEl.value = originalText || "";
-    improvedEl.value = improvedText || "";
-    modalContainer.classList.add("open");
-  }
+  console.log("[Prompeii] Improve Modal initialized.");
+}
 
-  function hideImproveModal() {
-    modalContainer.classList.remove("open");
-  }
+// =============================================================
+// OPEN MODAL
+// =============================================================
+function showImproveModal(originalText = "") {
+  if (!modalContainer) return;
 
-  closeBtn.addEventListener("click", hideImproveModal);
-  cancelBtn.addEventListener("click", hideImproveModal);
+  diffOriginal.value = originalText || "";
+  diffImproved.value = "";
 
-  applyBtn.addEventListener("click", () => {
-    // Caller should listen for a custom event to receive improved text
-    const detail = { improved: improvedEl.value };
-    modalContainer.dispatchEvent(new CustomEvent("improve:apply", { detail }));
-    hideImproveModal();
+  modalContainer.classList.add("open");
+  document.body.classList.add("modal-open");
+}
+
+// =============================================================
+// CLOSE MODAL
+// =============================================================
+function closeModal() {
+  if (!modalContainer) return;
+
+  modalContainer.classList.remove("open");
+  document.body.classList.remove("modal-open");
+
+  diffOriginal.value = "";
+  diffImproved.value = "";
+}
+
+// =============================================================
+// APPLY IMPROVEMENT
+// =============================================================
+//
+// When user clicks Apply:
+//   - Dispatch custom event "improve:apply"
+//   - admin-edit.js or admin-create.js listens for this event
+//
+function applyImproved() {
+  const improvedText = diffImproved.value;
+
+  const event = new CustomEvent("improve:apply", {
+    detail: { improved: improvedText }
   });
 
-  // Expose for other modules
-  window.PrompeiiImproveModal = { showImproveModal, hideImproveModal, modalContainer };
+  modalContainer.dispatchEvent(event);
+  closeModal();
 }
+
+// =============================================================
+// EVENT WIRING (SAFE, NO DUPLICATES)
+// =============================================================
+function wireModalEvents() {
+  if (!modalContainer) return;
+
+  // Prevent double binding
+  btnApply?.removeEventListener("click", applyImproved);
+  btnCancel?.removeEventListener("click", closeModal);
+  btnCloseX?.removeEventListener("click", closeModal);
+
+  // Wire fresh
+  btnApply?.addEventListener("click", applyImproved);
+  btnCancel?.addEventListener("click", closeModal);
+  btnCloseX?.addEventListener("click", closeModal);
+
+  // Allow click on backdrop to close
+  modalContainer.addEventListener("click", (e) => {
+    if (e.target === modalContainer) closeModal();
+  });
+}
+
+// =============================================================
+// INIT (runs when DOM is fully available)
+// =============================================================
+document.addEventListener("DOMContentLoaded", () => {
+  wireModalEvents();
+  console.log("[Prompeii] Improve Modal ready.");
+});
+
+// =============================================================
+// EXPOSE GLOBAL API
+// =============================================================
+window.PrompeiiImproveModal = {
+  showImproveModal,
+  modalContainer
+};

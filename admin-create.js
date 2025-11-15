@@ -1,118 +1,134 @@
-// --------------------------------------
-// Auth Guard (applied to all admin pages)
-// --------------------------------------
+// =========================================================
+// Prompeii Admin – Create Page (SAFE + GLOBAL SUPABASE)
+// =========================================================
+
+// ----- GLOBAL SUPABASE CLIENT -----
+const supabase = window.supabaseClient;
+
+// ----- REQUIRE AUTH -----
 async function requireAuth() {
-  const { data } = await supabase.auth.getSession();
-  if (!data.session) {
+  try {
+    const { data } = await supabase.auth.getSession();
+    if (!data?.session) {
+      window.location.href = "login.html";
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("Auth error:", err);
     window.location.href = "login.html";
     return false;
   }
-  return true;
 }
 
-// Wrap init in auth check
-document.addEventListener("DOMContentLoaded", async () => {
+// ----- DOM HELP -----
+function $(id) {
+  return document.getElementById(id);
+}
+
+import {
+  CATEGORY_OPTIONS,
+  TONE_OPTIONS,
+  USE_CASE_OPTIONS,
+  SKILL_LEVEL_OPTIONS,
+  fillSelect
+} from "./options.js";
+
+// ----- INPUTS -----
+const smartTitle = $("smartTitle");
+const category = $("category");
+const statusEl = $("status");
+const tags = $("tags");
+const tone = $("tone");
+const useCase = $("useCase");
+const skillLevel = $("skillLevel");
+const model = $("model");
+const intro = $("intro");
+const promptTextarea = $("promptText");
+
+const createBtn = $("createBtn");
+const aiTitleBtn = $("aiTitleBtn");
+const aiIntroBtn = $("aiIntroBtn");
+const aiPromptBtn = $("aiPromptBtn");
+
+const toast = window.toast;
+
+// ----- CREATE PROMPT -----
+async function createPrompt() {
+  const payload = {
+    smart_title: smartTitle.value.trim(),
+    category: category.value.trim(),
+    status: statusEl.value.trim(),
+    tags: tags.value.split(",").map(t => t.trim()).filter(Boolean),
+    tone: tone.value.trim(),
+    use_case: useCase.value.trim(),
+    skill_level: skillLevel.value.trim(),
+    model: model.value.trim(),
+    intro: intro.value,
+    prompt: promptTextarea.value,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+
+  const { data, error } = await supabase
+    .from("prompts")
+    .insert(payload)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Create error:", error);
+    toast("Failed to create prompt");
+    return;
+  }
+
+  toast("Created!");
+  window.location.href = `admin-edit.html?id=${data.id}`;
+}
+
+// ----- SELECT POPULATION -----
+function wireSelects() {
+  fillSelect(category, CATEGORY_OPTIONS);
+  fillSelect(tone, TONE_OPTIONS);
+  fillSelect(useCase, USE_CASE_OPTIONS);
+  fillSelect(skillLevel, SKILL_LEVEL_OPTIONS);
+}
+
+// ----- IMPROVE MODAL -----
+function wireImproveButtons() {
+  if (!window.PrompeiiImproveModal) return;
+
+  const { showImproveModal, modalContainer } = window.PrompeiiImproveModal;
+
+  function useImprove(inputEl) {
+    const original = inputEl.value || "";
+    showImproveModal(original);
+
+    function applyHandler(e) {
+      const improved = e.detail?.improved || "";
+      if (improved) inputEl.value = improved;
+      modalContainer.removeEventListener("improve:apply", applyHandler);
+    }
+
+    modalContainer.addEventListener("improve:apply", applyHandler);
+  }
+
+  aiIntroBtn?.addEventListener("click", () => useImprove(intro));
+  aiPromptBtn?.addEventListener("click", () => useImprove(promptTextarea));
+  aiTitleBtn?.addEventListener("click", () => useImprove(smartTitle));
+}
+
+// ----- INIT -----
+async function init() {
+
   const ok = await requireAuth();
   if (!ok) return;
 
-  // run the page normally:
-  init();
-});
+  wireSelects();
+  wireImproveButtons();
 
-window.addEventListener("error", function (e) {
-  console.error("🔥 Global Error Caught:", e.message, e);
-  toast("Something went wrong — check console.");
-});
-
-window.addEventListener("unhandledrejection", function (e) {
-  console.error("🔥 Promise Error:", e.reason);
-  toast("Unexpected error — check console.");
-});
-
-
-// admin-create.js
-import { createClient } from '@supabase/supabase-js';
-import { CATEGORY_OPTIONS, TONE_OPTIONS, USE_CASE_OPTIONS, SKILL_LEVEL_OPTIONS, fillSelect } from './options.js';
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
-
-function $(sel) { return document.querySelector(sel); }
-function toast(msg, type = "info") {
-  const box = $("#toast");
-  if (!box) return alert(msg);
-  box.textContent = msg;
-  box.className = `toast show ${type}`;
-  setTimeout(() => box.classList.remove("show"), 2000);
+  createBtn?.addEventListener("click", createPrompt);
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-  // Wire selects
-  fillSelect($("#category"), CATEGORY_OPTIONS);
-  fillSelect($("#tone"), TONE_OPTIONS);
-  fillSelect($("#useCase"), USE_CASE_OPTIONS);
-  fillSelect($("#skillLevel"), SKILL_LEVEL_OPTIONS);
-
-  // Wire buttons
-  $("#createBtn")?.addEventListener("click", onCreate);
-  $("#cancelBtn")?.addEventListener("click", () => window.location.href = "/admin.html");
-
-  // Optional: AI helpers (if present on page)
-  $("#aiImproveIntro")?.addEventListener("click", () => toast("AI Improve Intro coming soon", "info"));
-  $("#aiImprovePrompt")?.addEventListener("click", () => toast("AI Improve Prompt coming soon", "info"));
-});
-
-async function onCreate() {
-  const smartTitle = $("#smartTitle")?.value.trim();
-  const category = $("#category")?.value.trim();
-  const status = $("#status")?.value.trim() || "draft";
-  const intro = $("#intro")?.value.trim();
-  const promptText = $("#promptText")?.value.trim();
-
-  if (!smartTitle || !category || !intro || !promptText) {
-    toast("Please fill Smart Title, Category, Intro, and Prompt.", "error");
-    return;
-  }
-
-  const tagsRaw = $("#tags")?.value.trim() || "";
-  const tags = tagsRaw
-    ? tagsRaw.split(",").map(t => t.trim()).filter(Boolean)
-    : [];
-
-  const tone = $("#tone")?.value || null;
-  const use_case = $("#useCase")?.value || null;
-  const skill_level = $("#skillLevel")?.value || null;
-
-  const model_used = $("#model")?.value?.trim() || null;
-
-  const payload = {
-    smart_title_human: smartTitle,
-    category,
-    status,
-    intro,
-    prompt: promptText,
-    tags,               // text[]
-    tone,
-    use_case,
-    skill_level,
-    model_used,
-    // optional numeric fields defaulting to null or 0 as needed
-    quality_score: null,
-    clarity: null,
-    creativity: null,
-    usefulness: null,
-  };
-
-  const { data, error } = await supabase.from("prompts").insert(payload).select("id").single();
-  if (error) {
-    console.error(error);
-    toast(`Create failed: ${error.message}`, "error");
-    return;
-  }
-
-  toast("Prompt created!", "success");
-  // Redirect to editor for further edits
-  window.location.href = `/admin-edit.html?id=${data.id}`;
-}
+// ----- STARTUP -----
+document.addEventListener("DOMContentLoaded", init);
