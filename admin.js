@@ -1,5 +1,5 @@
 // =========================================================
-// Prompeii Admin – List Page Logic (FINAL VERSION)
+// Prompeii Admin – List Page Logic (FINAL, AUTH-GUARDED)
 // =========================================================
 
 // --- Supabase credentials ---
@@ -9,15 +9,44 @@ const SUPABASE_ANON_KEY =
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// --- DOM elements ---
+// =========================================================
+// Global Error Boundaries (Prevents Silent Breaks)
+// =========================================================
+window.addEventListener("error", function (e) {
+  console.error("🔥 Global Error Caught:", e.message, e);
+  toast("Something went wrong — check console.");
+});
+
+window.addEventListener("unhandledrejection", function (e) {
+  console.error("🔥 Promise Error:", e.reason);
+  toast("Unexpected error — check console.");
+});
+
+// =========================================================
+// Auth Guard (applies to all admin pages)
+// =========================================================
+async function requireAuth() {
+  const { data } = await supabase.auth.getSession();
+  if (!data.session) {
+    window.location.href = "login.html";
+    return false;
+  }
+  return true;
+}
+
+// =========================================================
+// DOM Elements
+// =========================================================
 const searchInput = document.getElementById("searchInput");
 const statusFilter = document.getElementById("statusFilter");
-const tableBody = document.getElementById("tableBody");  // FIXED
+const tableBody = document.getElementById("tableBody");
 const emptyStateEl = document.getElementById("emptyState");
 const rowCountEl = document.getElementById("rowCount");
 const headerCells = document.querySelectorAll("th[data-sort]");
 
-// --- State ---
+// =========================================================
+// State
+// =========================================================
 const state = {
   rows: [],
   filtered: [],
@@ -32,13 +61,14 @@ const state = {
 // =========================================================
 function toast(msg) {
   const t = document.getElementById("toast");
+  if (!t) return;
   t.textContent = msg;
   t.classList.add("toast-visible");
   setTimeout(() => t.classList.remove("toast-visible"), 2000);
 }
 
 // =========================================================
-// Load data
+// Load rows from Supabase
 // =========================================================
 async function loadRows() {
   console.log("Loading rows from Supabase…");
@@ -61,7 +91,7 @@ async function loadRows() {
 }
 
 // =========================================================
-// Sorting helper (PLACED OUTSIDE applyFilters)
+// Sorting Helper
 // =========================================================
 function sortByKey(items, key, dir = "asc") {
   const isNumeric = ["quality_score", "clarity", "creativity", "usefulness"].includes(key);
@@ -106,7 +136,7 @@ function applyFilters() {
     });
   }
 
-  // Sort here
+  // Sort
   rows = sortByKey(rows, state.sortKey, state.sortDirection);
 
   state.filtered = rows;
@@ -114,21 +144,23 @@ function applyFilters() {
 }
 
 // =========================================================
-// Render table
+// Render Table
 // =========================================================
 function renderTable() {
   tableBody.innerHTML = "";
 
   if (!state.filtered.length) {
     emptyStateEl.style.display = "block";
-    rowCountEl.textContent = "0 prompts";
+    if (rowCountEl) rowCountEl.textContent = "0 prompts";
     return;
   }
 
   emptyStateEl.style.display = "none";
-  rowCountEl.textContent = `${state.filtered.length} prompts`;
+  if (rowCountEl) rowCountEl.textContent = `${state.filtered.length} prompts`;
 
   state.filtered.forEach((row) => {
+    if (!row.id) return;
+
     const tr = document.createElement("tr");
     tr.addEventListener("click", () =>
       window.location.href = `admin-edit.html?id=${row.id}`
@@ -152,7 +184,7 @@ function renderTable() {
 }
 
 // =========================================================
-// Event bindings
+// Event Bindings
 // =========================================================
 searchInput.addEventListener("input", (e) => {
   state.search = e.target.value;
@@ -164,7 +196,7 @@ statusFilter.addEventListener("change", (e) => {
   applyFilters();
 });
 
-// --- Sorting events ---
+// Sorting
 headerCells.forEach((th) => {
   th.addEventListener("click", () => {
     const key = th.dataset.sort;
@@ -179,6 +211,7 @@ headerCells.forEach((th) => {
     headerCells.forEach((cell) =>
       cell.classList.remove("sort-asc", "sort-desc")
     );
+
     th.classList.add(
       state.sortDirection === "asc" ? "sort-asc" : "sort-desc"
     );
@@ -190,7 +223,16 @@ headerCells.forEach((th) => {
 // =========================================================
 // Init
 // =========================================================
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("Admin list page loaded.");
+function init() {
+  console.log("Admin list page initialized.");
   loadRows();
+}
+
+// =========================================================
+// Auth-protected startup
+// =========================================================
+document.addEventListener("DOMContentLoaded", async () => {
+  const ok = await requireAuth();
+  if (!ok) return;
+  init();
 });

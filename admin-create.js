@@ -1,3 +1,35 @@
+// --------------------------------------
+// Auth Guard (applied to all admin pages)
+// --------------------------------------
+async function requireAuth() {
+  const { data } = await supabase.auth.getSession();
+  if (!data.session) {
+    window.location.href = "login.html";
+    return false;
+  }
+  return true;
+}
+
+// Wrap init in auth check
+document.addEventListener("DOMContentLoaded", async () => {
+  const ok = await requireAuth();
+  if (!ok) return;
+
+  // run the page normally:
+  init();
+});
+
+window.addEventListener("error", function (e) {
+  console.error("🔥 Global Error Caught:", e.message, e);
+  toast("Something went wrong — check console.");
+});
+
+window.addEventListener("unhandledrejection", function (e) {
+  console.error("🔥 Promise Error:", e.reason);
+  toast("Unexpected error — check console.");
+});
+
+
 // admin-create.js
 import { createClient } from '@supabase/supabase-js';
 import { CATEGORY_OPTIONS, TONE_OPTIONS, USE_CASE_OPTIONS, SKILL_LEVEL_OPTIONS, fillSelect } from './options.js';

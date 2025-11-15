@@ -1,7 +1,42 @@
-/* =========================================================
-   Prompeii Admin – Edit Page (FINAL, HTML-SYNCED VERSION)
-   ========================================================= */
+// =========================================================
+// Prompeii Admin – Edit Page (SAFE GLOBAL SUPABASE VERSION)
+// =========================================================
 
+// --------------------------------------
+// GLOBAL SUPABASE CLIENT
+// --------------------------------------
+const supabase = window.supabaseClient;   // <-- now reliable
+
+// --------------------------------------
+// Auth Guard (safe)
+// --------------------------------------
+async function requireAuth() {
+  try {
+    const { data } = await supabase.auth.getSession();
+
+    if (!data?.session) {
+      window.location.href = "login.html";
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error("Auth check failed:", err);
+    window.location.href = "login.html";
+    return false;
+  }
+}
+
+// --------------------------------------
+// SAFE DOM GETTER
+// --------------------------------------
+function $(id) {
+  return document.getElementById(id);
+}
+
+// --------------------------------------
+// IMPORT SELECT OPTIONS
+// --------------------------------------
 import {
   CATEGORY_OPTIONS,
   TONE_OPTIONS,
@@ -10,29 +45,13 @@ import {
   fillSelect
 } from "./options.js";
 
-const SUPABASE_URL = "https://nbduzkycgklkptbefalu.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iZHV6a3ljZ2tsa3B0YmVmYWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4OTAxODMsImV4cCI6MjA3ODQ2NjE4M30.WR_Uah7Z8x_Tos6Nx8cjDo_q6e6c15xGDPOMGbb_RZ0";
-
-const supabaseEdit = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
-
-function $(id) {
-  return document.getElementById(id);
-}
-
-/* --------------------------------------
-   DOM Elements (MATCH YOUR ADVANCED HTML)
------------------------------------------ */
-
-// Meta top
+// --------------------------------------
+// DOM ELEMENTS
+// --------------------------------------
 const metaId = $("promptId");
 const metaCreated = $("createdAt");
 const metaUpdated = $("updatedAt");
 
-// Inputs
 const smartTitle = $("smartTitle");
 const category = $("category");
 const statusEl = $("status");
@@ -44,42 +63,34 @@ const model = $("model");
 const intro = $("intro");
 const promptTextarea = $("promptText");
 
-// Sticky footer buttons
 const saveBtn = $("saveBtn");
 const deleteBtn = $("deleteBtn");
 const duplicateBtn = $("duplicateBtn");
 
-// AI helper buttons (YOUR HTML values)
 const aiTitleBtn = $("aiTitleBtn");
 const aiIntroBtn = $("aiIntroBtn");
 const aiPromptBtn = $("aiPromptBtn");
 
-/* --------------------------------------
-   Toast
------------------------------------------ */
-function toast(msg) {
-  const t = $("toast");
-  if (!t) return;
-  t.textContent = msg;
-  t.classList.add("toast-visible");
-  setTimeout(() => t.classList.remove("toast-visible"), 1800);
-}
+// --------------------------------------
+// Toast (comes from global)
+// --------------------------------------
+const toast = window.toast;
 
-/* --------------------------------------
-   Get ID from URL
------------------------------------------ */
+// --------------------------------------
+// Get ID from URL
+// --------------------------------------
 function getId() {
   return new URLSearchParams(window.location.search).get("id");
 }
 
-/* --------------------------------------
-   Load Prompt
------------------------------------------ */
+// --------------------------------------
+// Load Prompt
+// --------------------------------------
 async function loadPrompt() {
   const id = getId();
   if (!id) return;
 
-  const { data, error } = await supabaseEdit
+  const { data, error } = await supabase
     .from("prompts")
     .select("*")
     .eq("id", id)
@@ -109,9 +120,9 @@ async function loadPrompt() {
   promptTextarea.value = data.prompt || "";
 }
 
-/* --------------------------------------
-   Save Prompt
------------------------------------------ */
+// --------------------------------------
+// Save Prompt
+// --------------------------------------
 async function savePrompt() {
   const id = getId();
   if (!id) return;
@@ -120,10 +131,7 @@ async function savePrompt() {
     smart_title: smartTitle.value.trim(),
     category: category.value.trim(),
     status: statusEl.value.trim(),
-    tags: tags.value
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean),
+    tags: tags.value.split(",").map(t => t.trim()).filter(Boolean),
     tone: tone.value.trim(),
     use_case: useCase.value.trim(),
     skill_level: skillLevel.value.trim(),
@@ -133,7 +141,7 @@ async function savePrompt() {
     updated_at: new Date().toISOString()
   };
 
-  const { error } = await supabaseEdit
+  const { error } = await supabase
     .from("prompts")
     .update(payload)
     .eq("id", id);
@@ -147,14 +155,14 @@ async function savePrompt() {
   }
 }
 
-/* --------------------------------------
-   Duplicate
------------------------------------------ */
+// --------------------------------------
+// Duplicate
+// --------------------------------------
 async function duplicatePrompt() {
   const id = getId();
   if (!id) return;
 
-  const { data } = await supabaseEdit
+  const { data } = await supabase
     .from("prompts")
     .select("*")
     .eq("id", id)
@@ -175,7 +183,7 @@ async function duplicatePrompt() {
     updated_at: new Date().toISOString()
   };
 
-  const { data: inserted, error } = await supabaseEdit
+  const { data: inserted, error } = await supabase
     .from("prompts")
     .insert(clone)
     .select()
@@ -190,85 +198,79 @@ async function duplicatePrompt() {
   window.location.href = `admin-edit.html?id=${inserted.id}`;
 }
 
-/* --------------------------------------
-   Delete
------------------------------------------ */
+// --------------------------------------
+// Delete
+// --------------------------------------
 async function deletePrompt() {
   const id = getId();
   if (!id) return;
 
   if (!confirm("Delete this prompt permanently?")) return;
 
-  await supabaseEdit.from("prompts").delete().eq("id", id);
+  await supabase.from("prompts").delete().eq("id", id);
 
   window.location.href = "admin.html";
 }
 
-/* --------------------------------------
-   Populate Select Dropdowns
------------------------------------------ */
+// --------------------------------------
+// Populate Select Dropdowns
+// --------------------------------------
 function wireSelects() {
-  fillSelect(category, CATEGORY_OPTIONS, category.value);
-  fillSelect(tone, TONE_OPTIONS, tone.value);
-  fillSelect(useCase, USE_CASE_OPTIONS, useCase.value);
-  fillSelect(skillLevel, SKILL_LEVEL_OPTIONS, skillLevel.value);
+  fillSelect(category, CATEGORY_OPTIONS);
+  fillSelect(tone, TONE_OPTIONS);
+  fillSelect(useCase, USE_CASE_OPTIONS);
+  fillSelect(skillLevel, SKILL_LEVEL_OPTIONS);
 }
 
-/* --------------------------------------
-   Improve Modal Wiring
------------------------------------------ */
+// --------------------------------------
+// Improve Modal
+// --------------------------------------
 function wireImproveButtons() {
-  const btnImproveIntro = $("aiIntroBtn");
-  const btnImprovePrompt = $("aiPromptBtn");
-
-  const introEl = $("intro");
-  const promptEl = $("promptText");
-
-  if (!window.PrompeiiImproveModal) {
-    console.warn("Improve modal unavailable");
-    return;
-  }
+  if (!window.PrompeiiImproveModal) return;
 
   const { showImproveModal, modalContainer } = window.PrompeiiImproveModal;
 
-  function useImprove(targetField) {
-    const original = targetField.value || "";
+  function useImprove(inputEl) {
+    const original = inputEl.value || "";
     showImproveModal(original);
 
-    const onApply = (e) => {
+    const applyHandler = (e) => {
       const improved = e.detail?.improved || "";
-      if (improved) targetField.value = improved;
-      modalContainer.removeEventListener("improve:apply", onApply);
+      if (improved) inputEl.value = improved;
+      modalContainer.removeEventListener("improve:apply", applyHandler);
     };
 
-    modalContainer.addEventListener("improve:apply", onApply);
+    modalContainer.addEventListener("improve:apply", applyHandler);
   }
 
-  if (btnImproveIntro)
-    btnImproveIntro.addEventListener("click", () => useImprove(introEl));
-
-  if (btnImprovePrompt)
-    btnImprovePrompt.addEventListener("click", () => useImprove(promptEl));
+  aiIntroBtn?.addEventListener("click", () => useImprove(intro));
+  aiPromptBtn?.addEventListener("click", () => useImprove(promptTextarea));
 }
 
-/* --------------------------------------
-   Init
------------------------------------------ */
-function init() {
-  // Buttons
-  if (saveBtn) saveBtn.addEventListener("click", savePrompt);
-  if (duplicateBtn)
-    duplicateBtn.addEventListener("click", duplicatePrompt);
-  if (deleteBtn) deleteBtn.addEventListener("click", deletePrompt);
+// --------------------------------------
+// Init
+// --------------------------------------
+async function init() {
+  // Auth
+  const ok = await requireAuth();
+  if (!ok) return;
 
-  // Load prompt
-  loadPrompt();
+  // Buttons
+  saveBtn?.addEventListener("click", savePrompt);
+  duplicateBtn?.addEventListener("click", duplicatePrompt);
+  deleteBtn?.addEventListener("click", deletePrompt);
+
+  // Load
+  await loadPrompt();
 
   // Populate selects
   wireSelects();
 
-  // Wire modal improve buttons
+  // Improve buttons
   wireImproveButtons();
 }
 
+// --------------------------------------
+// Startup
+// --------------------------------------
 document.addEventListener("DOMContentLoaded", init);

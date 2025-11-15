@@ -1,3 +1,13 @@
+window.addEventListener("error", function (e) {
+  console.error("🔥 Global Error Caught:", e.message, e);
+  toast("Something went wrong — check console.");
+});
+
+window.addEventListener("unhandledrejection", function (e) {
+  console.error("🔥 Promise Error:", e.reason);
+  toast("Unexpected error — check console.");
+});
+
 // modal.js — resilient ID binding (supports both legacy and advanced editor IDs)
 
 function pick(...ids) {
