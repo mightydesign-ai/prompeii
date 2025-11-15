@@ -120,24 +120,36 @@
 
     </div>
   </div>
+<!-- GLOBAL LOADING OVERLAY -->
+<div id="loadingOverlay" class="loading-overlay">
+  <div class="loading-spinner"></div>
+</div>
 
   <!-- SCRIPTS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
-  <script src="/global-supabase.js"></script>
+  <!-- 1 — Supabase UMD -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
 
-  <script>
-    window.toast = function (msg) {
-      const t = document.getElementById("toast");
-      if (!t) return;
-      t.textContent = msg;
-      t.classList.add("toast-visible");
-      setTimeout(() => t.classList.remove("toast-visible"), 2000);
-    };
-  </script>
+<!-- 2 — Global Supabase client -->
+<script src="/global-supabase.js"></script>
 
-  <script type="module" src="./options.js"></script>
-  <script type="module" src="./modal.js"></script>
-  <script type="module" src="./admin-create.js"></script>
+<!-- 3 — Global Loading Overlay (must come BEFORE modules) -->
+<script src="/loading-overlay.js"></script>
+
+<!-- 4 — Global Toast -->
+<script>
+  window.toast = function(msg) {
+    const t = document.getElementById("toast");
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add("toast-visible");
+    setTimeout(() => t.classList.remove("toast-visible"), 2000);
+  };
+</script>
+
+<!-- 5 — Module scripts (safe because globals exist now) -->
+<script type="module" src="./options.js"></script>
+<script type="module" src="./modal.js"></script>
+<script type="module" src="./admin-create.js"></script>
 
 </body>
 </html>

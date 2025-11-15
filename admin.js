@@ -2,12 +2,10 @@
 // Prompeii Admin – List Page Logic (FINAL, AUTH-GUARDED)
 // =========================================================
 
-// --- Supabase credentials ---
-const SUPABASE_URL = "https://nbduzkycgklkptbefalu.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iZHV6a3ljZ2tsa3B0YmVmYWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4OTAxODMsImV4cCI6MjA3ODQ2NjE4M30.WR_Uah7Z8x_Tos6Nx8cjDo_q6e6c15xGDPOMGbb_RZ0";
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// =========================================================
+// Use GLOBAL Supabase client (single instance only)
+// =========================================================
+const supabase = window.supabaseClient;
 
 // =========================================================
 // Global Error Boundaries (Prevents Silent Breaks)
@@ -23,7 +21,7 @@ window.addEventListener("unhandledrejection", function (e) {
 });
 
 // =========================================================
-// Auth Guard (applies to all admin pages)
+// Auth Guard
 // =========================================================
 async function requireAuth() {
   const { data } = await supabase.auth.getSession();
@@ -55,17 +53,6 @@ const state = {
   search: "",
   status: "all",
 };
-
-// =========================================================
-// Toast
-// =========================================================
-function toast(msg) {
-  const t = document.getElementById("toast");
-  if (!t) return;
-  t.textContent = msg;
-  t.classList.add("toast-visible");
-  setTimeout(() => t.classList.remove("toast-visible"), 2000);
-}
 
 // =========================================================
 // Load rows from Supabase
@@ -119,12 +106,10 @@ function sortByKey(items, key, dir = "asc") {
 function applyFilters() {
   let rows = [...state.rows];
 
-  // Status filter
   if (state.status !== "all") {
     rows = rows.filter((r) => (r.status || "").toLowerCase() === state.status);
   }
 
-  // Search filter
   if (state.search) {
     const q = state.search.toLowerCase();
     rows = rows.filter((r) => {
@@ -136,7 +121,6 @@ function applyFilters() {
     });
   }
 
-  // Sort
   rows = sortByKey(rows, state.sortKey, state.sortDirection);
 
   state.filtered = rows;
@@ -151,17 +135,18 @@ function renderTable() {
 
   if (!state.filtered.length) {
     emptyStateEl.style.display = "block";
-    if (rowCountEl) rowCountEl.textContent = "0 prompts";
+    rowCountEl.textContent = "0 prompts";
     return;
   }
 
   emptyStateEl.style.display = "none";
-  if (rowCountEl) rowCountEl.textContent = `${state.filtered.length} prompts`;
+  rowCountEl.textContent = `${state.filtered.length} prompts`;
 
   state.filtered.forEach((row) => {
     if (!row.id) return;
 
     const tr = document.createElement("tr");
+
     tr.addEventListener("click", () =>
       window.location.href = `admin-edit.html?id=${row.id}`
     );
@@ -196,7 +181,6 @@ statusFilter.addEventListener("change", (e) => {
   applyFilters();
 });
 
-// Sorting
 headerCells.forEach((th) => {
   th.addEventListener("click", () => {
     const key = th.dataset.sort;
@@ -212,9 +196,7 @@ headerCells.forEach((th) => {
       cell.classList.remove("sort-asc", "sort-desc")
     );
 
-    th.classList.add(
-      state.sortDirection === "asc" ? "sort-asc" : "sort-desc"
-    );
+    th.classList.add(state.sortDirection === "asc" ? "sort-asc" : "sort-desc");
 
     applyFilters();
   });
