@@ -2,22 +2,20 @@
 // Prompeii Admin – List Page Logic (FINAL VERSION)
 // =========================================================
 
-// --- Supabase credentials embedded directly ---
+// --- Supabase credentials ---
 const SUPABASE_URL = "https://nbduzkycgklkptbefalu.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iZHV6a3ljZ2tsa3B0YmVmYWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4OTAxODMsImV4cCI6MjA3ODQ2NjE4M30.WR_Uah7Z8x_Tos6Nx8cjDo_q6e6c15xGDPOMGbb_RZ0";
 
-// --- Supabase client ---
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // --- DOM elements ---
 const searchInput = document.getElementById("searchInput");
 const statusFilter = document.getElementById("statusFilter");
-const tableBody = document.getElementById("promptTableBody");
-const rowCountEl = document.getElementById("rowCount");
+const tableBody = document.getElementById("tableBody");  // FIXED
 const emptyStateEl = document.getElementById("emptyState");
-
-const headerCells = document.querySelectorAll("th.sortable");
+const rowCountEl = document.getElementById("rowCount");
+const headerCells = document.querySelectorAll("th[data-sort]");
 
 // --- State ---
 const state = {
@@ -63,6 +61,29 @@ async function loadRows() {
 }
 
 // =========================================================
+// Sorting helper (PLACED OUTSIDE applyFilters)
+// =========================================================
+function sortByKey(items, key, dir = "asc") {
+  const isNumeric = ["quality_score", "clarity", "creativity", "usefulness"].includes(key);
+  const isDate = ["createddate", "lastupdated", "updated_at"].includes(key);
+  const mul = dir === "asc" ? 1 : -1;
+
+  return items.slice().sort((a, b) => {
+    const va = a[key];
+    const vb = b[key];
+
+    if (isNumeric) return (Number(va ?? 0) - Number(vb ?? 0)) * mul;
+    if (isDate)
+      return (
+        (new Date(va || 0).getTime() - new Date(vb || 0).getTime()) * mul
+      );
+
+    return ((va ?? "").toString().toLowerCase())
+      .localeCompare((vb ?? "").toString().toLowerCase()) * mul;
+  });
+}
+
+// =========================================================
 // Filtering + Sorting
 // =========================================================
 function applyFilters() {
@@ -70,9 +91,7 @@ function applyFilters() {
 
   // Status filter
   if (state.status !== "all") {
-    rows = rows.filter(
-      (r) => (r.status || "").toLowerCase() === state.status
-    );
+    rows = rows.filter((r) => (r.status || "").toLowerCase() === state.status);
   }
 
   // Search filter
@@ -87,25 +106,8 @@ function applyFilters() {
     });
   }
 
-  // Sorting
-  rows.sort((a, b) => {
-    const key = state.sortKey;
-    const dir = state.sortDirection === "asc" ? 1 : -1;
-
-    if (key === "updated_at") {
-      return (
-        (new Date(a.updated_at).getTime() -
-          new Date(b.updated_at).getTime()) * dir
-      );
-    }
-
-    const va = (a[key] || "").toString().toLowerCase();
-    const vb = (b[key] || "").toString().toLowerCase();
-
-    if (va < vb) return -1 * dir;
-    if (va > vb) return 1 * dir;
-    return 0;
-  });
+  // Sort here
+  rows = sortByKey(rows, state.sortKey, state.sortDirection);
 
   state.filtered = rows;
   renderTable();
@@ -128,23 +130,14 @@ function renderTable() {
 
   state.filtered.forEach((row) => {
     const tr = document.createElement("tr");
-    tr.addEventListener("click", () => {
-      window.location.href = `admin-edit.html?id=${row.id}`;
-    });
+    tr.addEventListener("click", () =>
+      window.location.href = `admin-edit.html?id=${row.id}`
+    );
 
     tr.innerHTML = `
       <td>${row.smart_title || "Untitled"}</td>
       <td>${row.category || "—"}</td>
-      <td>
-        ${(row.tags || [])
-          .map((t) => `<span class="tag-chip">${t}</span>`)
-          .join("")}
-      </td>
-      <td>${row.model || "—"}</td>
-      <td class="numeric">${row.clarity ?? "—"}</td>
-      <td class="numeric">${row.creativity ?? "—"}</td>
-      <td class="numeric">${row.usefulness ?? "—"}</td>
-      <td class="numeric">${row.quality_score ?? "—"}</td>
+      <td>${row.status}</td>
       <td>${new Date(row.updated_at).toLocaleDateString()}</td>
       <td>
         <button class="btn-ghost-compact"
@@ -171,9 +164,10 @@ statusFilter.addEventListener("change", (e) => {
   applyFilters();
 });
 
+// --- Sorting events ---
 headerCells.forEach((th) => {
   th.addEventListener("click", () => {
-    const key = th.dataset.sortKey;
+    const key = th.dataset.sort;
 
     if (state.sortKey === key) {
       state.sortDirection = state.sortDirection === "asc" ? "desc" : "asc";

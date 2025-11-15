@@ -1,274 +1,355 @@
 /* =========================================================
-   Base Layout / Typography
-========================================================= */
+   Prompeii Admin – LIGHT THEME
+   Global Layout / Forms / Tables / Buttons / Modal / Toast
+   ========================================================= */
 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-  background: #f8fafc;
-  color: #111827;
-}
-
-h1, h2, h3 {
-  margin: 0 0 12px;
-  font-weight: 600;
-  color: #111827;
-}
-
-p, label {
-  margin: 0 0 6px;
-  font-size: 14px;
-}
-
-.help {
-  color: #6b7280;
-  font-size: 12px;
-  margin-top: 4px;
-}
-
-a {
-  color: #2563eb;
-  text-decoration: none;
-}
-
-.back-link {
-  font-size: 14px;
-}
-
-/* =========================================================
-   Header
-========================================================= */
-
-.admin-header {
-  padding: 24px 32px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #ffffff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.admin-subtitle {
-  color: #6b7280;
-  margin-top: 4px;
-}
-
-/* =========================================================
-   Page Layout / Columns
-========================================================= */
-
-.page-section {
-  padding: 24px 32px;
-}
-
-.page-content {
-  padding: 24px 32px 140px;
-  max-width: 1500px;
-  margin: 0 auto;
-  display: flex;
-  gap: 32px;
-}
-
-.two-col-left {
-  width: 45%;
-  min-width: 500px;
-}
-
-.two-col-right {
-  width: 55%;
-}
-
-/* =========================================================
-   Cards
-========================================================= */
-
-.card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 24px;
-}
-
-.card-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-/* =========================================================
-   Form Controls
-========================================================= */
-
-.input,
-.select,
-.textarea {
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background: #ffffff;
-  margin-bottom: 18px;
+/* RESET ------------------------------ */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-.textarea {
-  height: 180px;
-  resize: vertical;
+body {
+  margin: 0;
+  background: #f7f7f7;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color: #111;
 }
 
-.inline-ai {
+/* UTILITIES ------------------------------ */
+.hidden {
+  display: none !important;
+}
+
+.muted-count {
+  color: #888;
+  font-size: 0.9rem;
+  margin-right: 12px;
+}
+
+/* HEADER ------------------------------ */
+.admin-header {
+  background: #ffffff;
+  padding: 24px 32px;
+  border-bottom: 1px solid #e3e3e3;
   display: flex;
-  gap: 8px;
   align-items: center;
+  justify-content: space-between;
 }
 
-.three-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+.admin-header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.admin-subtitle {
+  margin: 4px 0 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* ACTIONS ------------------------------ */
+.admin-actions {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-/* =========================================================
-   Buttons
-========================================================= */
-
-.btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
+/* BUTTONS ------------------------------ */
+.btn-primary {
+  background: #ff3b30;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
   cursor: pointer;
-  border: 1px solid transparent;
+  font-weight: 600;
+  transition: 0.2s;
 }
 
-.btn-primary {
-  background: #2563eb;
-  color: white;
+.btn-primary:hover {
+  background: #e63528;
 }
 
 .btn-secondary {
-  background: #e5e7eb;
+  background: #ffffff;
+  border: 1px solid #ccc;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-secondary:hover {
+  background: #f4f4f4;
 }
 
 .btn-danger {
-  background: #dc2626;
-  color: white;
+  background: #ff3b30;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 .btn-ghost-compact {
+  background: none;
+  border: 1px solid #ddd;
   padding: 4px 10px;
-  font-size: 13px;
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
 }
 
-/* Remove underline from primary buttons */
-a.btn-primary,
-a.btn-primary:link,
-a.btn-primary:visited,
-a.btn-primary:hover,
-a.btn-primary:active {
-  text-decoration: none !important;
+.btn-ai {
+  background: #ffffff;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-left: 8px;
 }
 
-/* =========================================================
-   Table (Admin List)
-========================================================= */
-
-.table-container {
-  padding: 24px 32px 140px;
+/* FILTER BAR ------------------------------ */
+.filter-bar {
+  padding: 20px 32px;
+  background: #ffffff;
+  border-bottom: 1px solid #e3e3e3;
+  display: flex;
+  gap: 12px;
 }
 
-table {
+.input-text,
+.input-select,
+.input-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  font-size: 0.95rem;
+}
+
+.input-row {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* EDIT GRID ------------------------------ */
+.edit-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  padding: 32px;
+}
+
+/* LEFT PANEL ------------------------------ */
+.edit-panel {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #e3e3e3;
+}
+
+.form-label {
+  display: block;
+  margin: 20px 0 6px;
+  font-weight: 600;
+  color: #333;
+}
+
+.tall-textarea {
+  height: 200px;
+}
+
+/* META / ID AREA ------------------------------ */
+.meta-info {
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e3e3e3;
+  margin-bottom: 20px;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+/* RIGHT PANEL ------------------------------ */
+.preview-panel {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #e3e3e3;
+}
+
+.preview-panel h2 {
+  margin-top: 0;
+}
+
+.preview-hint {
+  color: #777;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.preview-box {
+  background: #fafafa;
+  border: 1px solid #e3e3e3;
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 120px;
+}
+
+/* SCORE GRID ------------------------------ */
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.score-item input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+/* STICKY FOOTER ------------------------------ */
+.sticky-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-top: 1px solid #e3e3e3;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  z-index: 100;
+}
+
+/* TABLE ------------------------------ */
+.table-wrapper {
+  padding: 32px;
+}
+
+.admin-table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  background: #ffffff;
+  border-radius: 12px;
   overflow: hidden;
+  border: 1px solid #e3e3e3;
 }
 
-thead {
-  background: #f1f5f9;
+.admin-table th,
+.admin-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.95rem;
 }
 
-th, td {
-  padding: 14px 16px;
-  font-size: 14px;
-  border-bottom: 1px solid #e5e7eb;
+.admin-table th {
+  background: #f9f9f9;
+  cursor: pointer;
+  user-select: none;
+}
+
+.admin-table tr:hover {
+  background: #f5f5f5;
 }
 
 .numeric {
   text-align: right;
 }
 
+/* TAG CHIPS ------------------------------ */
 .tag-chip {
-  padding: 2px 8px;
-  background: #e5e7eb;
-  border-radius: 4px;
-  font-size: 12px;
+  display: inline-block;
+  background: #efefef;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  border-radius: 999px;
   margin-right: 4px;
+  color: #555;
 }
 
-/* Status dropdown width */
-#statusFilter {
-  width: 140px;
-  min-width: 120px;
-  max-width: 180px;
+/* EMPTY STATE ------------------------------ */
+.empty-state {
+  padding: 32px;
+  text-align: center;
+  color: #666;
 }
 
-.inline-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* =========================================================
-   Sticky Footer
-========================================================= */
-
-.action-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #ffffff;
-  border-top: 1px solid #e5e7eb;
-  padding: 14px 24px;
-  z-index: 999;
-  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.action-footer-inner {
-  max-width: 1500px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
-
-/* =========================================================
-   Toast
-========================================================= */
-
+/* TOAST ------------------------------ */
 .toast {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #111827;
-  color: white;
-  padding: 12px 16px;
-  border-radius: 6px;
+  bottom: 80px;
+  right: 32px;
+  background: #111;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 8px;
   opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 2000;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  z-index: 200;
 }
 
 .toast-visible {
   opacity: 1;
+}
+
+/* MODAL ------------------------------ */
+.improve-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(20, 20, 20, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 300;
+}
+
+.improve-modal-content {
+  background: #ffffff;
+  width: 600px;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  margin-left: auto;
+  cursor: pointer;
+  color: #555;
+}
+
+button,
+a.btn-primary,
+a.btn-secondary,
+a.btn-ghost-compact {
+  text-decoration: none !important;
 }

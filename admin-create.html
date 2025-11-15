@@ -2,117 +2,183 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Prompeii Admin Console — Create Prompt</title>
+  <title>Prompeii Admin — Create Prompt</title>
   <link rel="stylesheet" href="admin.css" />
+
+  <style>
+    .improve-modal { display: none; }
+    .improve-modal.open { display: flex; }
+  </style>
 </head>
 
-<body>
+<body class="admin-body">
 
-  <!-- Header -->
+  <!-- ======================================================
+       HEADER BAR
+  ====================================================== -->
   <header class="admin-header">
     <div>
       <h1>Create New Prompt</h1>
-      <p class="admin-subtitle">Add a new curated prompt to your catalog.</p>
+      <p class="admin-subtitle">Add a brand-new prompt to the curated database.</p>
     </div>
-    <a href="admin.html" class="back-link">← Back to List</a>
+
+    <div class="admin-actions">
+      <a href="admin.html" class="btn-secondary">← Back to List</a>
+    </div>
   </header>
 
-  <!-- MAIN FORM CONTENT -->
-  <div class="page-content">
 
-    <!-- Left column -->
-    <div class="two-col-left">
+  <!-- ======================================================
+       MAIN GRID LAYOUT
+  ====================================================== -->
+  <div class="edit-grid">
 
-      <div class="card">
-        <h2>General Metadata</h2>
+    <!-- =============================================
+         LEFT: FORM INPUTS
+    ============================================== -->
+    <section class="edit-panel">
 
-        <label>Smart Title *</label>
-        <div class="inline-ai">
-          <input type="text" id="smartTitle" class="input" />
-          <button class="btn btn-ghost-compact" id="aiTitleBtn">AI Title</button>
-        </div>
-
-        <label>Category *</label>
-        <select id="category" class="select"></select>
-
-        <label>Status *</label>
-        <select id="status" class="select">
-          <option value="draft" selected>Draft</option>
-          <option value="curated">Curated</option>
-          <option value="archived">Archived</option>
-        </select>
-
-        <label>Tags</label>
-        <input type="text" id="tags" class="input" placeholder="email, tone, outreach" />
-        <p class="help">Tags stored as text[] array.</p>
-
-        <div class="three-grid">
-          <div>
-            <label>Tone</label>
-            <select id="tone" class="select"></select>
-          </div>
-
-          <div>
-            <label>Use Case</label>
-            <select id="useCase" class="select"></select>
-          </div>
-
-          <div>
-            <label>Skill Level</label>
-            <select id="skillLevel" class="select"></select>
-          </div>
-        </div>
-
-        <label>Model</label>
-        <select id="model" class="select">
-          <option>gpt-4.1</option>
-          <option>gpt-5</option>
-          <option>claude-3.5</option>
-        </select>
-
-      </div>
-    </div>
-
-    <!-- Right column -->
-    <div class="two-col-right">
-
-      <div class="card">
-        <div class="card-title-row">
-          <h2>Intro *</h2>
-          <button class="btn btn-ghost-compact" id="aiIntroBtn">AI Intro</button>
-        </div>
-        <textarea id="intro" class="textarea"></textarea>
+      <!-- Smart Title -->
+      <label class="form-label">Smart Title</label>
+      <div class="input-row">
+        <input type="text" id="smartTitle" class="input-text" placeholder="e.g., Product Strategy Sprint Generator" />
+        <button id="aiTitleBtn" class="btn-ai">Improve</button>
       </div>
 
-      <div class="card">
-        <div class="card-title-row">
-          <h2>Prompt *</h2>
-          <button class="btn btn-ghost-compact" id="aiPromptBtn">Improve</button>
-        </div>
-        <textarea id="promptText" class="textarea"></textarea>
+      <!-- Category -->
+      <label class="form-label">Category</label>
+      <select id="category" class="input-select"></select>
+
+      <!-- Status -->
+      <label class="form-label">Status</label>
+      <select id="status" class="input-select">
+        <option value="draft">Draft</option>
+        <option value="curated">Curated</option>
+        <option value="archived">Archived</option>
+      </select>
+
+      <!-- Tags -->
+      <label class="form-label">Tags (comma-separated)</label>
+      <input type="text" id="tags" class="input-text" placeholder="design, ux, brainstorm" />
+
+      <!-- Tone -->
+      <label class="form-label">Tone</label>
+      <select id="tone" class="input-select"></select>
+
+      <!-- Use Case -->
+      <label class="form-label">Use Case</label>
+      <select id="useCase" class="input-select"></select>
+
+      <!-- Skill Level -->
+      <label class="form-label">Skill Level</label>
+      <select id="skillLevel" class="input-select"></select>
+
+      <!-- Model -->
+      <label class="form-label">Model</label>
+      <input type="text" id="model" class="input-text" placeholder="GPT-4.1, Claude 3.5, Llama, etc." />
+
+      <!-- Intro -->
+      <label class="form-label">Intro (Short Description)</label>
+      <div class="input-row">
+        <textarea id="intro" class="input-textarea" rows="4"></textarea>
+        <button id="aiImproveIntro" class="btn-ai">Improve</button>
       </div>
 
+      <!-- Prompt Text -->
+      <label class="form-label">Prompt</label>
+      <div class="input-row">
+        <textarea id="promptText" class="input-textarea tall-textarea"></textarea>
+        <button id="aiImprovePrompt" class="btn-ai">Improve</button>
+      </div>
+
+    </section>
+
+
+    <!-- =============================================
+         RIGHT: OPTIONAL PREVIEW PANEL
+    ============================================== -->
+    <aside class="preview-panel">
+      <h2>Preview Output</h2>
+      <p class="preview-hint">This will show a formatted preview later if needed.</p>
+      <div class="preview-box">
+        <p class="placeholder">Preview will appear here…</p>
+      </div>
+
+      <h2 style="margin-top: 32px;">Quality Scoring</h2>
+      <p class="preview-hint">These will be populated by automated scoring in V5.</p>
+
+      <div class="score-grid">
+        <div class="score-item">
+          <label>Clarity</label>
+          <input disabled placeholder="—" />
+        </div>
+
+        <div class="score-item">
+          <label>Creativity</label>
+          <input disabled placeholder="—" />
+        </div>
+
+        <div class="score-item">
+          <label>Usefulness</label>
+          <input disabled placeholder="—" />
+        </div>
+
+        <div class="score-item">
+          <label>Quality Score</label>
+          <input disabled placeholder="—" />
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+
+
+  <!-- ======================================================
+       STICKY FOOTER ACTIONS
+  ====================================================== -->
+  <footer class="sticky-footer">
+    <button id="createBtn" class="btn-primary">Create Prompt</button>
+    <button id="cancelBtn" class="btn-secondary">Cancel</button>
+  </footer>
+
+
+  <!-- ======================================================
+       TOAST
+  ====================================================== -->
+  <div id="toast" class="toast"></div>
+
+
+  <!-- ======================================================
+       IMPROVE MODAL (same as edit page)
+  ====================================================== -->
+  <div id="improveModal" class="improve-modal">
+    <div class="improve-modal-content">
+
+      <h2>Improve Text</h2>
+
+      <label class="form-label">Original</label>
+      <textarea id="diffOriginal" class="input-textarea" rows="6"></textarea>
+
+      <label class="form-label" style="margin-top: 16px;">Improved</label>
+      <textarea id="diffImproved" class="input-textarea" rows="6"></textarea>
+
+      <div class="modal-actions">
+        <button id="btnCancelImproved" class="btn-secondary">Cancel</button>
+        <button id="btnAcceptImproved" class="btn-primary">Apply</button>
+        <button id="btnCloseImproveModal" class="modal-close">×</button>
+      </div>
     </div>
   </div>
 
-  <!-- ⭐ STICKY FOOTER ACTION BAR ⭐ -->
-  <footer class="action-footer">
-    <div class="action-footer-inner">
-      <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
-      <button id="createBtn" class="btn btn-primary">Create Prompt</button>
-    </div>
-  </footer>
 
-  <!-- Toast -->
-  <div id="toast" class="toast"></div>
+  <!-- ======================================================
+       SCRIPTS
+  ====================================================== -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script type="module" src="./options.js"></script>
+  <script type="module" src="./modal.js"></script>
+  <script type="module" src="./admin-create.js"></script>
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- Modal/AI helper shared -->
-  <script src="modal.js"></script>
-
-  <!-- Page logic -->
-  <script src="admin-create.js"></script>
 </body>
 </html>

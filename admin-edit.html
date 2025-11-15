@@ -2,125 +2,206 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Prompeii Admin Console — Edit Prompt</title>
+  <title>Prompeii Admin — Edit Prompt</title>
   <link rel="stylesheet" href="admin.css" />
+
+  <!-- Optional: You can include a favicon if desired -->
+  <link rel="icon" href="/favicon.ico" />
+
+  <style>
+    /* Ensure the modal starts hidden */
+    .improve-modal {
+      display: none;
+    }
+    .improve-modal.open {
+      display: flex;
+    }
+  </style>
 </head>
 
-<body>
+<body class="admin-body">
 
-  <!-- Header -->
+  <!-- ======================================================
+       HEADER BAR
+  ====================================================== -->
   <header class="admin-header">
     <div>
       <h1>Edit Prompt</h1>
-      <p class="admin-subtitle">Edit a curated prompt.</p>
+      <p class="admin-subtitle">Update metadata, improve content, and manage prompt versions.</p>
     </div>
-    <a href="admin.html" class="back-link">← Back to List</a>
+    <div class="admin-actions">
+      <a href="admin.html" class="btn-secondary">← Back to List</a>
+    </div>
   </header>
 
-  <!-- ID + timestamps -->
-  <section class="page-section meta-info">
-    <div>ID: <span id="promptId">—</span></div>
-    <div>Created: <span id="createdAt">—</span></div>
-    <div>Updated: <span id="updatedAt">—</span></div>
-  </section>
+  <!-- ======================================================
+       MAIN GRID LAYOUT
+  ====================================================== -->
+  <div class="edit-grid">
 
-  <!-- MAIN FORM CONTENT -->
-  <div class="page-content">
+    <!-- =============================================
+         LEFT: FORM INPUTS
+    ============================================== -->
+    <section class="edit-panel">
 
-    <!-- Left column -->
-    <div class="two-col-left">
-
-      <div class="card">
-        <h2>General Metadata</h2>
-
-        <label>Smart Title *</label>
-        <div class="inline-ai">
-          <input type="text" id="smartTitle" class="input" />
-          <button class="btn btn-ghost-compact" id="aiTitleBtn">AI Title</button>
+      <!-- Prompt ID + Timestamps -->
+      <div class="meta-info">
+        <div class="meta-row">
+          <span>ID:</span>
+          <strong id="promptId">—</strong>
         </div>
-
-        <label>Category *</label>
-        <select id="category" class="select"></select>
-
-        <label>Status *</label>
-        <select id="status" class="select">
-          <option value="draft">Draft</option>
-          <option value="curated">Curated</option>
-          <option value="archived">Archived</option>
-        </select>
-
-        <label>Tags</label>
-        <input type="text" id="tags" class="input" placeholder="email, tone, outreach" />
-        <p class="help">Tags stored as text[] array.</p>
-
-        <div class="three-grid">
-          <div>
-            <label>Tone</label>
-            <select id="tone" class="select"></select>
-          </div>
-
-          <div>
-            <label>Use Case</label>
-            <select id="useCase" class="select"></select>
-          </div>
-
-          <div>
-            <label>Skill Level</label>
-            <select id="skillLevel" class="select"></select>
-          </div>
+        <div class="meta-row">
+          <span>Created:</span>
+          <strong id="createdAt">—</strong>
         </div>
-
-        <label>Model</label>
-        <select id="model" class="select">
-          <option>gpt-4.1</option>
-          <option>gpt-5</option>
-          <option>claude-3.5</option>
-        </select>
-
-      </div>
-    </div>
-
-    <!-- Right column -->
-    <div class="two-col-right">
-
-      <div class="card">
-        <div class="card-title-row">
-          <h2>Intro *</h2>
-          <button class="btn btn-ghost-compact" id="aiIntroBtn">AI Intro</button>
+        <div class="meta-row">
+          <span>Updated:</span>
+          <strong id="updatedAt">—</strong>
         </div>
-        <textarea id="intro" class="textarea"></textarea>
       </div>
 
-      <div class="card">
-        <div class="card-title-row">
-          <h2>Prompt *</h2>
-          <button class="btn btn-ghost-compact" id="aiPromptBtn">Improve</button>
+      <!-- Smart Title -->
+      <label class="form-label">Smart Title</label>
+      <div class="input-row">
+        <input type="text" id="smartTitle" class="input-text" placeholder="e.g., UX Research Workshop Planner" />
+        <button id="aiTitleBtn" class="btn-ai">Improve</button>
+      </div>
+
+      <!-- Category -->
+      <label class="form-label">Category</label>
+      <select id="category" class="input-select"></select>
+
+      <!-- Status -->
+      <label class="form-label">Status</label>
+      <select id="status" class="input-select">
+        <option value="draft">Draft</option>
+        <option value="curated">Curated</option>
+        <option value="archived">Archived</option>
+      </select>
+
+      <!-- Tags -->
+      <label class="form-label">Tags (comma-separated)</label>
+      <input type="text" id="tags" class="input-text" placeholder="research, ux, workshop" />
+
+      <!-- Tone -->
+      <label class="form-label">Tone</label>
+      <select id="tone" class="input-select"></select>
+
+      <!-- Use Case -->
+      <label class="form-label">Use Case</label>
+      <select id="useCase" class="input-select"></select>
+
+      <!-- Skill Level -->
+      <label class="form-label">Skill Level</label>
+      <select id="skillLevel" class="input-select"></select>
+
+      <!-- Model -->
+      <label class="form-label">Model</label>
+      <input type="text" id="model" class="input-text" placeholder="GPT-4.1, Llama 3.2, etc." />
+
+      <!-- Intro -->
+      <label class="form-label">Intro (Short Description)</label>
+      <div class="input-row">
+        <textarea id="intro" class="input-textarea" rows="4"></textarea>
+        <button id="aiIntroBtn" class="btn-ai">Improve</button>
+      </div>
+
+      <!-- Prompt Text -->
+      <label class="form-label">Prompt</label>
+      <div class="input-row">
+        <textarea id="promptText" class="input-textarea tall-textarea"></textarea>
+        <button id="aiPromptBtn" class="btn-ai">Improve</button>
+      </div>
+
+    </section>
+
+    <!-- =============================================
+         RIGHT: PREVIEW PANEL (Optional / Expandable)
+    ============================================== -->
+    <aside class="preview-panel">
+      <h2>Preview Output</h2>
+      <p class="preview-hint">This will show a formatted preview later if needed.</p>
+      <div class="preview-box">
+        <p class="placeholder">Coming soon…</p>
+      </div>
+
+      <h2 style="margin-top: 32px;">Quality Scoring</h2>
+      <p class="preview-hint">These fields will be generated automatically by future AI scoring tools.</p>
+
+      <div class="score-grid">
+        <div class="score-item">
+          <label>Clarity</label>
+          <input id="clarity" disabled placeholder="—" />
         </div>
-        <textarea id="promptText" class="textarea"></textarea>
+
+        <div class="score-item">
+          <label>Creativity</label>
+          <input id="creativity" disabled placeholder="—" />
+        </div>
+
+        <div class="score-item">
+          <label>Usefulness</label>
+          <input id="usefulness" disabled placeholder="—" />
+        </div>
+
+        <div class="score-item">
+          <label>Quality Score</label>
+          <input id="quality_score" disabled placeholder="—" />
+        </div>
+      </div>
+
+      <h2 style="margin-top: 32px; color: #ff3b30;">Danger Zone</h2>
+      <button id="deleteBtn" class="btn-danger">Delete Prompt</button>
+
+    </aside>
+
+  </div>
+
+  <!-- ======================================================
+       STICKY FOOTER ACTIONS
+  ====================================================== -->
+  <footer class="sticky-footer">
+    <button id="saveBtn" class="btn-primary">Save Changes</button>
+    <button id="duplicateBtn" class="btn-secondary">Duplicate</button>
+  </footer>
+
+  <!-- ======================================================
+       TOAST
+  ====================================================== -->
+  <div id="toast" class="toast"></div>
+
+  <!-- ======================================================
+       IMPROVE MODAL (Advanced Version)
+  ====================================================== -->
+  <div id="improveModal" class="improve-modal">
+    <div class="improve-modal-content">
+
+      <h2>Improve Text</h2>
+
+      <!-- ORIGINAL -->
+      <label class="form-label">Original</label>
+      <textarea id="diffOriginal" class="input-textarea" rows="6"></textarea>
+
+      <!-- IMPROVED -->
+      <label class="form-label" style="margin-top: 16px;">Improved</label>
+      <textarea id="diffImproved" class="input-textarea" rows="6"></textarea>
+
+      <!-- Buttons -->
+      <div class="modal-actions">
+        <button id="btnCancelImproved" class="btn-secondary">Cancel</button>
+        <button id="btnAcceptImproved" class="btn-primary">Apply</button>
+        <button id="btnCloseImproveModal" class="modal-close">×</button>
       </div>
 
     </div>
   </div>
 
-  <!-- ⭐ STICKY FOOTER ACTION BAR ⭐ -->
-  <footer class="action-footer">
-    <div class="action-footer-inner">
-      <button id="duplicateBtn" class="btn btn-secondary">Duplicate</button>
-      <button id="deleteBtn" class="btn btn-danger">Delete</button>
-      <button id="saveBtn" class="btn btn-primary">Save Changes</button>
-    </div>
-  </footer>
-
-  <!-- Toast -->
-  <div id="toast" class="toast"></div>
-
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- Modal/AI helper shared -->
-  <script src="modal.js"></script>
-
-  <!-- Page logic -->
-  <script src="admin-edit.js"></script>
+  <!-- ======================================================
+       SCRIPTS
+  ====================================================== -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script type="module" src="./options.js"></script>
+  <script type="module" src="./modal.js"></script>
+  <script type="module" src="./admin-edit.js"></script>
 </body>
 </html>

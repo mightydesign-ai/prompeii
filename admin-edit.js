@@ -2,21 +2,32 @@
    Prompeii Admin – Edit Page (FINAL, HTML-SYNCED VERSION)
    ========================================================= */
 
+import {
+  CATEGORY_OPTIONS,
+  TONE_OPTIONS,
+  USE_CASE_OPTIONS,
+  SKILL_LEVEL_OPTIONS,
+  fillSelect
+} from "./options.js";
+
 const SUPABASE_URL = "https://nbduzkycgklkptbefalu.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iZHV6a3ljZ2tsa3B0YmVmYWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4OTAxODMsImV4cCI6MjA3ODQ2NjE4M30.WR_Uah7Z8x_Tos6Nx8cjDo_q6e6c15xGDPOMGbb_RZ0";
 
-const supabaseEdit = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseEdit = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
 function $(id) {
   return document.getElementById(id);
 }
 
-/* -------------------------------------- */
-/* DOM Elements (MATCH HTML EXACTLY) */
-/* -------------------------------------- */
+/* --------------------------------------
+   DOM Elements (MATCH YOUR ADVANCED HTML)
+----------------------------------------- */
 
-// Meta top section
+// Meta top
 const metaId = $("promptId");
 const metaCreated = $("createdAt");
 const metaUpdated = $("updatedAt");
@@ -38,15 +49,14 @@ const saveBtn = $("saveBtn");
 const deleteBtn = $("deleteBtn");
 const duplicateBtn = $("duplicateBtn");
 
-// AI helper buttons (names match your HTML)
+// AI helper buttons (YOUR HTML values)
 const aiTitleBtn = $("aiTitleBtn");
 const aiIntroBtn = $("aiIntroBtn");
 const aiPromptBtn = $("aiPromptBtn");
 
-/* -------------------------------------- */
-/* Toast */
-/* -------------------------------------- */
-
+/* --------------------------------------
+   Toast
+----------------------------------------- */
 function toast(msg) {
   const t = $("toast");
   if (!t) return;
@@ -55,16 +65,16 @@ function toast(msg) {
   setTimeout(() => t.classList.remove("toast-visible"), 1800);
 }
 
-/* -------------------------------------- */
-/* Get ID from URL */
-/* -------------------------------------- */
+/* --------------------------------------
+   Get ID from URL
+----------------------------------------- */
 function getId() {
   return new URLSearchParams(window.location.search).get("id");
 }
 
-/* -------------------------------------- */
-/* Load Prompt */
-/* -------------------------------------- */
+/* --------------------------------------
+   Load Prompt
+----------------------------------------- */
 async function loadPrompt() {
   const id = getId();
   if (!id) return;
@@ -99,31 +109,33 @@ async function loadPrompt() {
   promptTextarea.value = data.prompt || "";
 }
 
-/* -------------------------------------- */
-/* Save Prompt */
-/* -------------------------------------- */
+/* --------------------------------------
+   Save Prompt
+----------------------------------------- */
 async function savePrompt() {
   const id = getId();
   if (!id) return;
 
+  const payload = {
+    smart_title: smartTitle.value.trim(),
+    category: category.value.trim(),
+    status: statusEl.value.trim(),
+    tags: tags.value
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean),
+    tone: tone.value.trim(),
+    use_case: useCase.value.trim(),
+    skill_level: skillLevel.value.trim(),
+    model: model.value.trim(),
+    intro: intro.value,
+    prompt: promptTextarea.value,
+    updated_at: new Date().toISOString()
+  };
+
   const { error } = await supabaseEdit
     .from("prompts")
-    .update({
-      smart_title: smartTitle.value.trim(),
-      category: category.value.trim(),
-      status: statusEl.value.trim(),
-      tags: tags.value
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean),
-      tone: tone.value.trim(),
-      use_case: useCase.value.trim(),
-      skill_level: skillLevel.value.trim(),
-      model: model.value.trim(),
-      intro: intro.value,
-      prompt: promptTextarea.value,
-      updated_at: new Date().toISOString(),
-    })
+    .update(payload)
     .eq("id", id);
 
   if (error) {
@@ -135,9 +147,9 @@ async function savePrompt() {
   }
 }
 
-/* -------------------------------------- */
-/* Duplicate */
-/* -------------------------------------- */
+/* --------------------------------------
+   Duplicate
+----------------------------------------- */
 async function duplicatePrompt() {
   const id = getId();
   if (!id) return;
@@ -160,7 +172,7 @@ async function duplicatePrompt() {
     skill_level: data.skill_level || "",
     model: data.model || "",
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   };
 
   const { data: inserted, error } = await supabaseEdit
@@ -178,9 +190,9 @@ async function duplicatePrompt() {
   window.location.href = `admin-edit.html?id=${inserted.id}`;
 }
 
-/* -------------------------------------- */
-/* Delete */
-/* -------------------------------------- */
+/* --------------------------------------
+   Delete
+----------------------------------------- */
 async function deletePrompt() {
   const id = getId();
   if (!id) return;
@@ -192,26 +204,71 @@ async function deletePrompt() {
   window.location.href = "admin.html";
 }
 
-/* -------------------------------------- */
-/* AI Helpers (placeholder) */
-/* -------------------------------------- */
-if (aiTitleBtn)
-  aiTitleBtn.addEventListener("click", () => toast("AI Title helper not wired yet"));
-if (aiIntroBtn)
-  aiIntroBtn.addEventListener("click", () => toast("AI Intro helper not wired yet"));
-if (aiPromptBtn)
-  aiPromptBtn.addEventListener("click", () => toast("AI Prompt helper not wired yet"));
+/* --------------------------------------
+   Populate Select Dropdowns
+----------------------------------------- */
+function wireSelects() {
+  fillSelect(category, CATEGORY_OPTIONS, category.value);
+  fillSelect(tone, TONE_OPTIONS, tone.value);
+  fillSelect(useCase, USE_CASE_OPTIONS, useCase.value);
+  fillSelect(skillLevel, SKILL_LEVEL_OPTIONS, skillLevel.value);
+}
 
-/* -------------------------------------- */
-/* Init */
-/* -------------------------------------- */
+/* --------------------------------------
+   Improve Modal Wiring
+----------------------------------------- */
+function wireImproveButtons() {
+  const btnImproveIntro = $("aiIntroBtn");
+  const btnImprovePrompt = $("aiPromptBtn");
+
+  const introEl = $("intro");
+  const promptEl = $("promptText");
+
+  if (!window.PrompeiiImproveModal) {
+    console.warn("Improve modal unavailable");
+    return;
+  }
+
+  const { showImproveModal, modalContainer } = window.PrompeiiImproveModal;
+
+  function useImprove(targetField) {
+    const original = targetField.value || "";
+    showImproveModal(original);
+
+    const onApply = (e) => {
+      const improved = e.detail?.improved || "";
+      if (improved) targetField.value = improved;
+      modalContainer.removeEventListener("improve:apply", onApply);
+    };
+
+    modalContainer.addEventListener("improve:apply", onApply);
+  }
+
+  if (btnImproveIntro)
+    btnImproveIntro.addEventListener("click", () => useImprove(introEl));
+
+  if (btnImprovePrompt)
+    btnImprovePrompt.addEventListener("click", () => useImprove(promptEl));
+}
+
+/* --------------------------------------
+   Init
+----------------------------------------- */
 function init() {
-  // Wire sticky footer buttons
+  // Buttons
   if (saveBtn) saveBtn.addEventListener("click", savePrompt);
-  if (duplicateBtn) duplicateBtn.addEventListener("click", duplicatePrompt);
+  if (duplicateBtn)
+    duplicateBtn.addEventListener("click", duplicatePrompt);
   if (deleteBtn) deleteBtn.addEventListener("click", deletePrompt);
 
+  // Load prompt
   loadPrompt();
+
+  // Populate selects
+  wireSelects();
+
+  // Wire modal improve buttons
+  wireImproveButtons();
 }
 
 document.addEventListener("DOMContentLoaded", init);
