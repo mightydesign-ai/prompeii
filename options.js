@@ -1,93 +1,76 @@
-// =============================================================
-// Prompeii — Dropdown Option Utilities (SAFE GLOBAL VERSION)
-// =============================================================
+// =======================================================
+// Prompeii Admin — Option Lists (Static, Vite-safe)
+// =======================================================
 //
-// This module exports ONLY:
-//   - CATEGORY_OPTIONS
-//   - TONE_OPTIONS
-//   - USE_CASE_OPTIONS
-//   - SKILL_LEVEL_OPTIONS
-//   - fillSelect(selectEl, list)
-// 
-// It intentionally:
-//   - DOES NOT use toast()
-//   - DOES NOT attach global error handlers
-//   - DOES NOT assume DOM elements exist
-//   - DOES NOT assume early Supabase availability
+// No Supabase queries.
+// Everything is controlled, stable, curated.
 //
-// Fully compatible with Vite ES modules.
-// =============================================================
+// Exported functions (ES Modules):
+//   populateCategoryOptions
+//   populateToneOptions
+//   populateUseCaseOptions
+//   populateSkillLevelOptions
+//
+// =======================================================
 
 console.log("[Prompeii] options.js loaded");
 
-// -------------------------------------------------------------
-// Master Option Sets
-// -------------------------------------------------------------
-export const CATEGORY_OPTIONS = [
+// Clean curated options extracted from your CSV
+const CATEGORY_OPTIONS = [
   "Business",
-  "Creative",
-  "Coding",
-  "Education",
   "Marketing",
-  "Productivity",
-  "UX / UI",
-  "Writing",
-  "Other"
+  "Development"
 ];
 
-export const TONE_OPTIONS = [
+const TONE_OPTIONS = [
   "Professional",
-  "Friendly",
-  "Casual",
-  "Confident",
-  "Enthusiastic",
-  "Neutral"
+  "Persuasive",
+  "Analytical"
 ];
 
-export const USE_CASE_OPTIONS = [
+const USE_CASE_OPTIONS = [
   "Analysis",
-  "Brainstorming",
-  "Content Creation",
-  "Research",
-  "Planning",
-  "Design",
-  "Development",
-  "Writing"
+  "Product Writing",
+  "Code Review"
 ];
 
-export const SKILL_LEVEL_OPTIONS = [
+const SKILL_LEVEL_OPTIONS = [
   "Beginner",
   "Intermediate",
-  "Advanced",
-  "Expert"
+  "Advanced"
 ];
 
-// -------------------------------------------------------------
-// Safe Select Filler
-// -------------------------------------------------------------
-//
-// Usage:
-//    fillSelect(categorySelectEl, CATEGORY_OPTIONS)
-//
-// - If selectEl is missing → fails silently
-// - If array is empty → clears select
-// - Never throws errors
-//
-export function fillSelect(selectEl, list = []) {
-  if (!selectEl) {
-    console.warn("[Prompeii] fillSelect skipped (element missing).");
-    return;
-  }
-
-  // Clear existing options
+// Utility to fill a <select>
+function populate(selectEl, items) {
   selectEl.innerHTML = "";
-
-  // Populate
-  list.forEach((item) => {
-    const option = document.createElement("option");
-    option.value = item;
-    option.textContent = item;
-    selectEl.appendChild(option);
+  items.forEach(function (item) {
+    const opt = document.createElement("option");
+    opt.value = item;
+    opt.textContent = item;
+    selectEl.appendChild(opt);
   });
 }
 
+// =======================================================
+// Exported helpers
+// =======================================================
+
+export async function populateCategoryOptions(selectEl) {
+  populate(selectEl, CATEGORY_OPTIONS);
+}
+
+export async function populateToneOptions(selectEl) {
+  populate(selectEl, TONE_OPTIONS);
+}
+
+export async function populateUseCaseOptions(selectEl) {
+  populate(selectEl, USE_CASE_OPTIONS);
+}
+
+export async function populateSkillLevelOptions(selectEl) {
+  populate(selectEl, SKILL_LEVEL_OPTIONS);
+}
+
+// =======================================================
+// End
+// =======================================================

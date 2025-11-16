@@ -1,134 +1,169 @@
-// =========================================================
-// Prompeii Admin – Create Page (SAFE + GLOBAL SUPABASE)
-// =========================================================
+// =======================================================
+// Prompeii Admin - Create Prompt (Vite-safe, ASCII-only)
+// =======================================================
+// Global dependencies:
+//   window.supabaseClient
+//   window.showLoading()
+//   window.hideLoading()
+//   window.openAIModal()
+// =======================================================
 
-// ----- GLOBAL SUPABASE CLIENT -----
-const supabase = window.supabaseClient;
-
-// ----- REQUIRE AUTH -----
-async function requireAuth() {
-  try {
-    const { data } = await supabase.auth.getSession();
-    if (!data?.session) {
-      window.location.href = "login.html";
-      return false;
-    }
-    return true;
-  } catch (err) {
-    console.error("Auth error:", err);
-    window.location.href = "login.html";
-    return false;
-  }
-}
-
-// ----- DOM HELP -----
-function $(id) {
-  return document.getElementById(id);
-}
-
+// Import only ES Modules (not from public)
 import {
-  CATEGORY_OPTIONS,
-  TONE_OPTIONS,
-  USE_CASE_OPTIONS,
-  SKILL_LEVEL_OPTIONS,
-  fillSelect
-} from "./options.js";
+  populateCategoryOptions,
+  populateToneOptions,
+  populateUseCaseOptions,
+  populateSkillLevelOptions
+} from "/options.js";
 
-// ----- INPUTS -----
-const smartTitle = $("smartTitle");
-const category = $("category");
-const statusEl = $("status");
-const tags = $("tags");
-const tone = $("tone");
-const useCase = $("useCase");
-const skillLevel = $("skillLevel");
-const model = $("model");
-const intro = $("intro");
-const promptTextarea = $("promptText");
+// Global references
+const supabase = window.supabaseClient;
+const showLoading = window.showLoading;
+const hideLoading = window.hideLoading;
+const openAIModal = window.openAIModal;
 
-const createBtn = $("createBtn");
-const aiTitleBtn = $("aiTitleBtn");
-const aiIntroBtn = $("aiIntroBtn");
-const aiPromptBtn = $("aiPromptBtn");
+// Element refs
+const smartTitleEl = document.getElementById("smartTitle");
+const categoryEl = document.getElementById("category");
+const statusEl = document.getElementById("status");
+const tagsEl = document.getElementById("tags");
+const toneEl = document.getElementById("tone");
+const useCaseEl = document.getElementById("useCase");
+const skillLevelEl = document.getElementById("skillLevel");
+const modelEl = document.getElementById("model");
+const introEl = document.getElementById("intro");
+const promptTextEl = document.getElementById("promptText");
 
-const toast = window.toast;
+const saveBtn = document.getElementById("saveBtn");
+const toastEl = document.getElementById("toast");
 
-// ----- CREATE PROMPT -----
-async function createPrompt() {
-  const payload = {
-    smart_title: smartTitle.value.trim(),
-    category: category.value.trim(),
+const aiTitleBtn = document.getElementById("aiTitleBtn");
+const aiIntroBtn = document.getElementById("aiIntroBtn");
+const aiPromptBtn = document.getElementById("aiPromptBtn");
+
+// =======================================================
+// Validation
+// =======================================================
+function validatePromptFields(data) {
+  const errors = {};
+
+  if (!data.smart_title || data.smart_title.length < 3) {
+    errors.smartTitle = "Title too short";
+  }
+
+  if (!data.prompt || data.prompt.length < 30) {
+    errors.promptText = "Prompt must be 30+ characters";
+  }
+
+  if (!data.category) {
+    errors.category = "Category required";
+  }
+
+  if (!data.tags || data.tags.length === 0) {
+    errors.tags = "Tags required";
+  }
+
+  return errors;
+}
+
+function applyFieldErrors(errors) {
+  document.querySelectorAll("input, textarea, select").forEach(function (el) {
+    el.classList.remove("input-error");
+  });
+
+  Object.keys(errors).forEach(function (key) {
+    var el = document.getElementById(key);
+    if (el) el.classList.add("input-error");
+  });
+}
+
+// =======================================================
+// Build payload
+// =======================================================
+function collectPayload() {
+  return {
+    smart_title: smartTitleEl.value.trim(),
+    category: categoryEl.value.trim(),
     status: statusEl.value.trim(),
-    tags: tags.value.split(",").map(t => t.trim()).filter(Boolean),
-    tone: tone.value.trim(),
-    use_case: useCase.value.trim(),
-    skill_level: skillLevel.value.trim(),
-    model: model.value.trim(),
-    intro: intro.value,
-    prompt: promptTextarea.value,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    tags: tagsEl.value
+      .split(",")
+      .map(function (t) { return t.trim(); })
+      .filter(function (t) { return t.length > 0; }),
+    tone: toneEl.value.trim(),
+    use_case: useCaseEl.value.trim(),
+    skill_level: skillLevelEl.value.trim(),
+    model_used: modelEl.value.trim(),
+    intro: introEl.value.trim(),
+    prompt: promptTextEl.value.trim()
   };
+}
 
-  const { data, error } = await supabase
-    .from("prompts")
-    .insert(payload)
-    .select()
-    .single();
+// =======================================================
+// Save
+// =======================================================
+saveBtn.addEventListener("click", async function () {
+  showLoading();
 
-  if (error) {
-    console.error("Create error:", error);
-    toast("Failed to create prompt");
+  const data = collectPayload();
+  const errors = validatePromptFields(data);
+
+  applyFieldErrors(errors);
+
+  if (Object.keys(errors).length > 0) {
+    hideLoading();
+    showToast("Fix validation errors", true);
     return;
   }
 
-  toast("Created!");
-  window.location.href = `admin-edit.html?id=${data.id}`;
-}
+  const result = await supabase.from("prompts").insert(data).select().single();
 
-// ----- SELECT POPULATION -----
-function wireSelects() {
-  fillSelect(category, CATEGORY_OPTIONS);
-  fillSelect(tone, TONE_OPTIONS);
-  fillSelect(useCase, USE_CASE_OPTIONS);
-  fillSelect(skillLevel, SKILL_LEVEL_OPTIONS);
-}
+  hideLoading();
 
-// ----- IMPROVE MODAL -----
-function wireImproveButtons() {
-  if (!window.PrompeiiImproveModal) return;
-
-  const { showImproveModal, modalContainer } = window.PrompeiiImproveModal;
-
-  function useImprove(inputEl) {
-    const original = inputEl.value || "";
-    showImproveModal(original);
-
-    function applyHandler(e) {
-      const improved = e.detail?.improved || "";
-      if (improved) inputEl.value = improved;
-      modalContainer.removeEventListener("improve:apply", applyHandler);
-    }
-
-    modalContainer.addEventListener("improve:apply", applyHandler);
+  if (result.error || !result.data) {
+    console.error(result.error);
+    showToast("Save failed", true);
+    return;
   }
 
-  aiIntroBtn?.addEventListener("click", () => useImprove(intro));
-  aiPromptBtn?.addEventListener("click", () => useImprove(promptTextarea));
-  aiTitleBtn?.addEventListener("click", () => useImprove(smartTitle));
+  showToast("Created");
+
+  window.location.href = "./admin-edit.html?id=" + result.data.id;
+});
+
+// =======================================================
+// AI Buttons
+// =======================================================
+aiTitleBtn.addEventListener("click", function () {
+  openAIModal("Improve Title", smartTitleEl);
+});
+
+aiIntroBtn.addEventListener("click", function () {
+  openAIModal("Improve Intro", introEl);
+});
+
+aiPromptBtn.addEventListener("click", function () {
+  openAIModal("Improve Prompt", promptTextEl);
+});
+
+// =======================================================
+// Toast
+// =======================================================
+function showToast(message, isError) {
+  toastEl.textContent = message;
+  toastEl.classList.remove("hidden");
+  toastEl.style.backgroundColor = isError ? "#dc2626" : "#111827";
+
+  setTimeout(function () {
+    toastEl.classList.add("hidden");
+  }, 2000);
 }
 
-// ----- INIT -----
-async function init() {
-
-  const ok = await requireAuth();
-  if (!ok) return;
-
-  wireSelects();
-  wireImproveButtons();
-
-  createBtn?.addEventListener("click", createPrompt);
-}
-
-// ----- STARTUP -----
-document.addEventListener("DOMContentLoaded", init);
+// =======================================================
+// Init
+// =======================================================
+(async function init() {
+  await populateCategoryOptions(categoryEl);
+  await populateToneOptions(toneEl);
+  await populateUseCaseOptions(useCaseEl);
+  await populateSkillLevelOptions(skillLevelEl);
+})();
