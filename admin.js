@@ -91,9 +91,7 @@ function sortByKey(items, key, dir = "asc") {
 
     if (isNumeric) return (Number(va ?? 0) - Number(vb ?? 0)) * mul;
     if (isDate)
-      return (
-        (new Date(va || 0).getTime() - new Date(vb || 0).getTime()) * mul
-      );
+      return (new Date(va || 0).getTime() - new Date(vb || 0).getTime()) * mul;
 
     return ((va ?? "").toString().toLowerCase())
       .localeCompare((vb ?? "").toString().toLowerCase()) * mul;
@@ -128,37 +126,41 @@ function applyFilters() {
 }
 
 // =========================================================
-// Render Table
+// Render Table (Tailwind Version)
 // =========================================================
 function renderTable() {
   tableBody.innerHTML = "";
 
   if (!state.filtered.length) {
-    emptyStateEl.style.display = "block";
+    emptyStateEl.classList.remove("hidden");
     rowCountEl.textContent = "0 prompts";
     return;
   }
 
-  emptyStateEl.style.display = "none";
+  emptyStateEl.classList.add("hidden");
   rowCountEl.textContent = `${state.filtered.length} prompts`;
 
   state.filtered.forEach((row) => {
     if (!row.id) return;
 
     const tr = document.createElement("tr");
+    tr.className =
+      "hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors";
 
     tr.addEventListener("click", () =>
       window.location.href = `admin-edit.html?id=${row.id}`
     );
 
     tr.innerHTML = `
-      <td>${row.smart_title || "Untitled"}</td>
-      <td>${row.category || "—"}</td>
-      <td>${row.status}</td>
-      <td>${new Date(row.updated_at).toLocaleDateString()}</td>
-      <td>
-        <button class="btn-ghost-compact"
-          onclick="event.stopPropagation(); window.location.href='admin-edit.html?id=${row.id}'">
+      <td class="px-4 py-3">${row.smart_title || "Untitled"}</td>
+      <td class="px-4 py-3">${row.category || "—"}</td>
+      <td class="px-4 py-3 capitalize">${row.status}</td>
+      <td class="px-4 py-3">${new Date(row.updated_at).toLocaleDateString()}</td>
+      <td class="px-4 py-3">
+        <button
+          onclick="event.stopPropagation(); window.location.href='admin-edit.html?id=${row.id}'"
+          class="inline-flex items-center rounded-md bg-gray-900 text-white text-xs font-medium px-3 py-1 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 transition"
+        >
           Edit
         </button>
       </td>
@@ -196,7 +198,9 @@ headerCells.forEach((th) => {
       cell.classList.remove("sort-asc", "sort-desc")
     );
 
-    th.classList.add(state.sortDirection === "asc" ? "sort-asc" : "sort-desc");
+    th.classList.add(
+      state.sortDirection === "asc" ? "sort-asc" : "sort-desc"
+    );
 
     applyFilters();
   });

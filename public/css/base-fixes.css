@@ -1,0 +1,32 @@
+/* Restore browser-like defaults for admin console */
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+th, td {
+  padding: 12px 16px;
+}
+
+body {
+  background-color: #f9fafb; /* Tailwind gray-50 */
+}
+
+input, select {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db; /* gray-300 */
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+p {
+  margin-bottom: 12px;
+  font-size: 16px;
+  color: #4b5563; /* gray-600 */
+}
+

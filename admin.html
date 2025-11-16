@@ -1,133 +1,113 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Prompeii Admin — Prompt List</title>
 
-  <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-  <!-- Admin Styles -->
-  <link rel="stylesheet" href="./admin.css" />
+  <!-- Tailwind -->
   <link rel="stylesheet" href="/css/tailwind.css" />
-
-
-  <style>
-    .sort-indicator {
-      opacity: 0.4;
-    }
-
-    th.sort-asc .sort-indicator::after {
-      content: "▲";
-      margin-left: 4px;
-    }
-
-    th.sort-desc .sort-indicator::after {
-      content: "▼";
-      margin-left: 4px;
-    }
-  </style>
 </head>
 
-<body class="admin-body">
+<body class="h-full bg-white text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100">
+  <div class="min-h-dvh">
 
-  <!-- HEADER BAR -->
-  <header class="admin-header">
-    <div>
-      <h1>Prompeii Admin Console</h1>
-      <p class="admin-subtitle">
-        Manage curated prompts, update metadata, and maintain the library.
-      </p>
+    <!-- Header -->
+    <header class="border-b border-gray-200 bg-white/70 backdrop-blur dark:border-gray-800 dark:bg-gray-950/70">
+      <div class="mx-auto max-w-7xl px-6 py-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">Prompeii Admin Console</h1>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage curated prompts and metadata.</p>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <span id="rowCount" class="text-sm text-gray-500 dark:text-gray-400">—</span>
+
+          <a href="admin-create.html"
+             class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500">
+            + New Prompt
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="mx-auto max-w-7xl px-6 py-8 space-y-6">
+
+      <!-- Filters -->
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Search smart title, tags, category…"
+          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm
+                 shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500
+                 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100"
+        />
+
+        <select
+          id="statusFilter"
+          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm
+                 shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500
+                 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100"
+        >
+          <option value="all">All Statuses</option>
+          <option value="draft">Draft</option>
+          <option value="curated">Curated</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <table class="w-full text-left text-sm border-collapse">
+          <thead class="bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+            <tr class="text-sm font-medium">
+              <th data-sort="smart_title" class="cursor-pointer px-4 py-3">Smart Title</th>
+              <th data-sort="category" class="cursor-pointer px-4 py-3">Category</th>
+              <th data-sort="status" class="cursor-pointer px-4 py-3">Status</th>
+              <th data-sort="updated_at" class="cursor-pointer px-4 py-3">Updated</th>
+              <th class="px-4 py-3">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody id="tableBody" class="divide-y divide-gray-200 dark:divide-gray-800">
+            <!-- Rows injected by admin.js -->
+          </tbody>
+        </table>
+
+        <div id="emptyState" class="hidden p-6 text-center text-gray-500 dark:text-gray-400">
+          No prompts found.
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Toast -->
+    <div id="toast"
+         class="fixed inset-x-0 bottom-4 mx-auto w-fit rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-lg hidden">
     </div>
 
-    <div class="admin-actions">
-      <span id="rowCount" class="muted-count">—</span>
-      <a href="admin-create.html" class="btn-primary">+ New Prompt</a>
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" class="pointer-events-none fixed inset-0 z-50 hidden items-center justify-center bg-black/30">
+      <div class="size-10 animate-spin rounded-full border-2 border-white/30 border-t-white"></div>
     </div>
-  </header>
-
-  <!-- FILTER BAR -->
-  <section class="filter-bar">
-    <input
-      id="searchInput"
-      type="text"
-      class="input-text"
-      placeholder="Search by Smart Title, category, or tags…"
-    />
-
-    <select id="statusFilter" class="input-select">
-      <option value="all">All Statuses</option>
-      <option value="draft">Draft</option>
-      <option value="curated">Curated</option>
-      <option value="archived">Archived</option>
-    </select>
-  </section>
-
-  <!-- TABLE LIST -->
-  <section class="table-wrapper">
-    <table class="admin-table" id="promptTable">
-      <thead>
-        <tr>
-          <th data-sort="smart_title">
-            Smart Title <span class="sort-indicator"></span>
-          </th>
-          <th data-sort="category">
-            Category <span class="sort-indicator"></span>
-          </th>
-          <th data-sort="status">
-            Status <span class="sort-indicator"></span>
-          </th>
-          <th data-sort="updated_at">
-            Updated <span class="sort-indicator"></span>
-          </th>
-          <th style="width:110px;">Actions</th>
-        </tr>
-      </thead>
-
-      <tbody id="tableBody">
-        <!-- Rows injected by admin.js -->
-      </tbody>
-    </table>
-
-    <div id="emptyState" class="empty-state" style="display: none;">
-      <p>No prompts found. Adjust your filters or create a new one.</p>
-    </div>
-  </section>
-
-  <!-- TOAST -->
-  <div id="toast" class="toast"></div>
-
-  <!-- GLOBAL LOADING OVERLAY -->
-  <div id="loadingOverlay" class="loading-overlay">
-    <div class="loading-spinner"></div>
   </div>
 
-  <!-- ======================================================
-       GLOBAL SCRIPTS (LOAD IN ORDER)
-  ====================================================== -->
+  <!-- JS (ORDER MATTERS) -->
 
-  <!-- 1 — Supabase UMD -->
+  <!-- 1 — Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
 
-  <!-- 2 — Global Supabase client -->
+  <!-- 2 — Global Supabase client (must run BEFORE any admin scripts) -->
   <script src="/global-supabase.js"></script>
 
-  <!-- 3 — Global Loading Overlay -->
+  <!-- 3 — Overlay -->
   <script src="/loading-overlay.js"></script>
 
-  <!-- 4 — Global Toast -->
-  <script>
-    window.toast = function (msg) {
-      const t = document.getElementById("toast");
-      if (!t) return;
-      t.textContent = msg;
-      t.classList.add("toast-visible");
-      setTimeout(() => t.classList.remove("toast-visible"), 2000);
-    };
-  </script>
-
-  <!-- 5 — Page logic LAST -->
+  <!-- 4 — Admin logic (MUST be module for imports + proper execution) -->
   <script type="module" src="./admin.js"></script>
 
 </body>
