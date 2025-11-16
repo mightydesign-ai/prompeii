@@ -1,119 +1,103 @@
-// =============================================================
-// Prompeii — Improve Modal System (GLOBAL SAFE VERSION)
-// =============================================================
+// =======================================================
+// Prompeii — Improve Modal (Create + Edit pages)
+// =======================================================
 //
-// This script must be loaded AFTER:
-//   - global toast is defined
-//   - global supabase client is defined (optional here)
+// Provides UI overlay where the user can request AI
+// improvements to title, intro, or prompt text.
 //
-// This file registers a global object:
-//   window.PrompeiiImproveModal = { showImproveModal, modalContainer }
+// Exports:
+//   openAIModal(title, targetElement)
 //
-// The admin-edit.js and admin-create.js pages hook into this.
+// This file is imported by:
+//   admin-create.js
+//   admin-edit.js
 //
-// =============================================================
+// =======================================================
 
 console.log("[Prompeii] modal.js loaded");
 
-function $(id) {
-  return document.getElementById(id);
-}
+// Grab modal elements
+const modal           = document.getElementById("improveModal");
+const modalTitle      = document.getElementById("improveTitle");
+const modalTextarea   = document.getElementById("improveTextarea");
+const modalCancel     = document.getElementById("improveCancel");
+const modalSubmit     = document.getElementById("improveSubmit");
 
-// ----- DOM ELEMENTS -----
-const modalContainer = $("improveModal");
-const diffOriginal = $("diffOriginal");
-const diffImproved = $("diffImproved");
+// We will store the active target input/textarea element here
+let activeTarget = null;
 
-const btnApply = $("btnAcceptImproved");
-const btnCancel = $("btnCancelImproved");
-const btnCloseX = $("btnCloseImproveModal");
-
-// Safety: if page does not include modal, bail out
-if (!modalContainer) {
+// =======================================================
+// Validate modal exists (avoid breaking on admin.html)
+// =======================================================
+if (!modal || !modalTextarea || !modalSubmit) {
   console.warn("[Prompeii] Improve Modal not found on this page.");
 } else {
-  console.log("[Prompeii] Improve Modal initialized.");
-}
-
-// =============================================================
-// OPEN MODAL
-// =============================================================
-function showImproveModal(originalText = "") {
-  if (!modalContainer) return;
-
-  diffOriginal.value = originalText || "";
-  diffImproved.value = "";
-
-  modalContainer.classList.add("open");
-  document.body.classList.add("modal-open");
-}
-
-// =============================================================
-// CLOSE MODAL
-// =============================================================
-function closeModal() {
-  if (!modalContainer) return;
-
-  modalContainer.classList.remove("open");
-  document.body.classList.remove("modal-open");
-
-  diffOriginal.value = "";
-  diffImproved.value = "";
-}
-
-// =============================================================
-// APPLY IMPROVEMENT
-// =============================================================
-//
-// When user clicks Apply:
-//   - Dispatch custom event "improve:apply"
-//   - admin-edit.js or admin-create.js listens for this event
-//
-function applyImproved() {
-  const improvedText = diffImproved.value;
-
-  const event = new CustomEvent("improve:apply", {
-    detail: { improved: improvedText }
-  });
-
-  modalContainer.dispatchEvent(event);
-  closeModal();
-}
-
-// =============================================================
-// EVENT WIRING (SAFE, NO DUPLICATES)
-// =============================================================
-function wireModalEvents() {
-  if (!modalContainer) return;
-
-  // Prevent double binding
-  btnApply?.removeEventListener("click", applyImproved);
-  btnCancel?.removeEventListener("click", closeModal);
-  btnCloseX?.removeEventListener("click", closeModal);
-
-  // Wire fresh
-  btnApply?.addEventListener("click", applyImproved);
-  btnCancel?.addEventListener("click", closeModal);
-  btnCloseX?.addEventListener("click", closeModal);
-
-  // Allow click on backdrop to close
-  modalContainer.addEventListener("click", (e) => {
-    if (e.target === modalContainer) closeModal();
-  });
-}
-
-// =============================================================
-// INIT (runs when DOM is fully available)
-// =============================================================
-document.addEventListener("DOMContentLoaded", () => {
-  wireModalEvents();
   console.log("[Prompeii] Improve Modal ready.");
+}
+
+// =======================================================
+// Open Modal
+// =======================================================
+export function openAIModal(title, targetElement) {
+  if (!modal) return; // modal not available on this page
+
+  activeTarget = targetElement;
+
+  modalTitle.textContent = title || "Improve";
+  modalTextarea.value = targetElement.value || "";
+
+  // Show modal
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+
+  // Autofocus
+  setTimeout(() => {
+    modalTextarea.focus();
+    modalTextarea.selectionStart = modalTextarea.value.length;
+  }, 20);
+}
+
+// =======================================================
+// Close Modal
+// =======================================================
+function closeModal() {
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
+  activeTarget = null;
+}
+
+// =======================================================
+// Cancel Button
+// =======================================================
+modalCancel?.addEventListener("click", () => {
+  closeModal();
 });
 
-// =============================================================
-// EXPOSE GLOBAL API
-// =============================================================
-window.PrompeiiImproveModal = {
-  showImproveModal,
-  modalContainer
-};
+// =======================================================
+// ESC key closes modal
+// =======================================================
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeModal();
+});
+
+// =======================================================
+// Submit Button — apply changes
+// =======================================================
+modalSubmit?.addEventListener("click", () => {
+  if (activeTarget) {
+    activeTarget.value = modalTextarea.value.trim();
+    // trigger input event so preview updates
+    activeTarget.dispatchEvent(new Event("input"));
+  }
+  closeModal();
+});
+
+// =======================================================
+// Click outside the modal closes it
+// =======================================================
+modal?.addEventListener("click", (event) => {
+  if (event.target === modal) {
+    closeModal();
+  }
+});
