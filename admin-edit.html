@@ -1,167 +1,145 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Prompeii Admin — Edit Prompt</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="stylesheet" href="admin.css" />
-
-  <style>
-    .improve-modal { display: none; }
-    .improve-modal.open { display: flex; }
-  </style>
+  <link rel="stylesheet" href="/css/tailwind.css" />
 </head>
+<body class="h-full bg-white text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100">
+  <div class="min-h-dvh">
 
-<body class="admin-body">
+    <!-- Header -->
+    <header class="sticky top-0 z-30 border-b border-gray-200 bg-white/80 backdrop-blur dark:border-gray-800 dark:bg-gray-950/75">
+      <div class="mx-auto max-w-7xl px-6 py-5 flex items-center justify-between">
+        <div>
+          <h1 class="text-[20px] font-semibold">Edit Prompt</h1>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Update metadata and manage prompt content.</p>
+        </div>
+        <a href="admin.html"
+           class="inline-flex items-center rounded-lg bg-white px-3.5 py-2 text-sm font-medium text-gray-900 shadow-sm ring-1 ring-black/5
+                  hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800">← Back to List</a>
+      </div>
+    </header>
 
-  <!-- HEADER -->
-  <header class="admin-header">
-    <div>
-      <h1>Edit Prompt</h1>
-      <p class="admin-subtitle">Update metadata and manage prompt content.</p>
+    <!-- Content -->
+    <main class="mx-auto max-w-7xl px-6 py-8">
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+        <!-- Left: Form -->
+        <section class="lg:col-span-2 space-y-6">
+          <!-- Meta -->
+          <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <dl class="grid grid-cols-3 gap-4 text-xs text-gray-600 dark:text-gray-400">
+              <div><dt class="font-medium text-gray-700 dark:text-gray-300">ID</dt><dd id="promptId" class="mt-1">—</dd></div>
+              <div><dt class="font-medium text-gray-700 dark:text-gray-300">Created</dt><dd id="createdAt" class="mt-1">—</dd></div>
+              <div><dt class="font-medium text-gray-700 dark:text-gray-300">Updated</dt><dd id="updatedAt" class="mt-1">—</dd></div>
+            </dl>
+          </div>
+
+          <!-- Fields -->
+          <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900 space-y-5">
+
+            <label class="block text-sm font-medium">Smart Title</label>
+            <div class="flex gap-2">
+              <input id="smartTitle" class="flex-1 rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm shadow-sm outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 dark:border-gray-800 dark:bg-gray-950" />
+              <button id="aiTitleBtn" class="rounded-lg bg-gray-900 px-3.5 py-2 text-sm font-medium text-white shadow-sm ring-1 ring-black/5 hover:bg-gray-800 dark:bg-gray-200 dark:text-gray-900">Improve</button>
+            </div>
+
+            <label class="block text-sm font-medium">Category</label>
+            <select id="category" class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 dark:border-gray-800 dark:bg-gray-950"></select>
+
+            <label class="block text-sm font-medium">Status</label>
+            <select id="status" class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 dark:border-gray-800 dark:bg-gray-950">
+              <option value="draft">Draft</option>
+              <option value="curated">Curated</option>
+              <option value="archived">Archived</option>
+            </select>
+
+            <label class="block text-sm font-medium">Tags</label>
+            <input id="tags" class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 dark:border-gray-800 dark:bg-gray-950" />
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div>
+                <label class="block text-sm font-medium">Tone</label>
+                <select id="tone" class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 dark:border-gray-800 dark:bg-gray-950"></select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium">Use Case</label>
+                <select id="useCase" class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 dark:border-gray-800 dark:bg-gray-950"></select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium">Skill Level</label>
+                <select id="skillLevel" class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 dark:border-gray-800 dark:bg-gray-950"></select>
+              </div>
+            </div>
+
+            <label class="block text-sm font-medium">Model</label>
+            <input id="model" class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 dark:border-gray-800 dark:bg-gray-950" />
+
+            <label class="block text-sm font-medium">Intro</label>
+            <div class="flex gap-2">
+              <textarea id="intro" rows="4" class="flex-1 rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 dark:border-gray-800 dark:bg-gray-950"></textarea>
+              <button id="aiIntroBtn" class="self-start rounded-lg bg-gray-900 px-3.5 py-2 text-sm font-medium text-white shadow-sm ring-1 ring-black/5 hover:bg-gray-800 dark:bg-gray-200 dark:text-gray-900">Improve</button>
+            </div>
+
+            <label class="block text-sm font-medium">Prompt</label>
+            <div class="flex gap-2">
+              <textarea id="promptText" rows="10" class="flex-1 rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 dark:border-gray-800 dark:bg-gray-950"></textarea>
+              <button id="aiPromptBtn" class="self-start rounded-lg bg-gray-900 px-3.5 py-2 text-sm font-medium text-white shadow-sm ring-1 ring-black/5 hover:bg-gray-800 dark:bg-gray-200 dark:text-gray-900">Improve</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Right: Preview / Scores -->
+        <aside class="space-y-6">
+          <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <h2 class="text-sm font-semibold">Preview Output</h2>
+            <div class="mt-3 rounded-lg border border-gray-200 p-4 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400">Coming soon…</div>
+          </div>
+
+          <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <h2 class="text-sm font-semibold">Quality Scoring</h2>
+            <div class="mt-3 grid grid-cols-2 gap-3">
+              <input id="clarity" disabled placeholder="Clarity" class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-950" />
+              <input id="creativity" disabled placeholder="Creativity" class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-950" />
+              <input id="usefulness" disabled placeholder="Usefulness" class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-950" />
+              <input id="quality_score" disabled placeholder="Quality Score" class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-950" />
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <h2 class="text-sm font-semibold text-red-600">Danger Zone</h2>
+            <button id="deleteBtn" class="mt-3 w-full rounded-lg bg-red-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-500">Delete</button>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <!-- Sticky footer -->
+    <footer class="sticky bottom-0 z-30 border-t border-gray-200 bg-white/80 backdrop-blur dark:border-gray-800 dark:bg-gray-950/75">
+      <div class="mx-auto max-w-7xl px-6 py-4 flex items-center justify-end gap-3">
+        <button id="duplicateBtn" class="rounded-lg bg-white px-4 py-2 text-sm font-medium text-gray-900 shadow-sm ring-1 ring-black/5 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800">Duplicate</button>
+        <button id="saveBtn" class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-sm ring-1 ring-black/5 hover:bg-gray-800 dark:bg-gray-200 dark:text-gray-900">Save Changes</button>
+      </div>
+    </footer>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed inset-x-0 bottom-4 mx-auto w-fit rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-lg hidden"></div>
+
+    <!-- Overlay -->
+    <div id="loadingOverlay" class="pointer-events-none fixed inset-0 z-50 hidden items-center justify-center bg-black/30">
+      <div class="size-10 animate-spin rounded-full border-2 border-white/30 border-t-white"></div>
     </div>
-    <div class="admin-actions">
-      <a href="admin.html" class="btn-secondary">← Back to List</a>
-    </div>
-  </header>
-
-  <!-- MAIN LAYOUT -->
-  <div class="edit-grid">
-    
-    <!-- LEFT PANEL -->
-    <section class="edit-panel">
-
-      <div class="meta-info">
-        <div class="meta-row"><span>ID:</span> <strong id="promptId">—</strong></div>
-        <div class="meta-row"><span>Created:</span> <strong id="createdAt">—</strong></div>
-        <div class="meta-row"><span>Updated:</span> <strong id="updatedAt">—</strong></div>
-      </div>
-
-      <label class="form-label">Smart Title</label>
-      <div class="input-row">
-        <input id="smartTitle" class="input-text" type="text" />
-        <button id="aiTitleBtn" class="btn-ai">Improve</button>
-      </div>
-
-      <label class="form-label">Category</label>
-      <select id="category" class="input-select"></select>
-
-      <label class="form-label">Status</label>
-      <select id="status" class="input-select">
-        <option value="draft">Draft</option>
-        <option value="curated">Curated</option>
-        <option value="archived">Archived</option>
-      </select>
-
-      <label class="form-label">Tags</label>
-      <input id="tags" class="input-text" type="text" />
-
-      <label class="form-label">Tone</label>
-      <select id="tone" class="input-select"></select>
-
-      <label class="form-label">Use Case</label>
-      <select id="useCase" class="input-select"></select>
-
-      <label class="form-label">Skill Level</label>
-      <select id="skillLevel" class="input-select"></select>
-
-      <label class="form-label">Model</label>
-      <input id="model" class="input-text" type="text" />
-
-      <label class="form-label">Intro</label>
-      <div class="input-row">
-        <textarea id="intro" class="input-textarea"></textarea>
-        <button id="aiIntroBtn" class="btn-ai">Improve</button>
-      </div>
-
-      <label class="form-label">Prompt</label>
-      <div class="input-row">
-        <textarea id="promptText" class="input-textarea tall-textarea"></textarea>
-        <button id="aiPromptBtn" class="btn-ai">Improve</button>
-      </div>
-
-    </section>
-
-    <!-- RIGHT PANEL -->
-    <aside class="preview-panel">
-      <h2>Preview Output</h2>
-      <div class="preview-box">Coming soon…</div>
-
-      <h2 style="margin-top:32px;">Quality Scoring</h2>
-
-      <div class="score-grid">
-        <div class="score-item"><label>Clarity</label><input id="clarity" disabled /></div>
-        <div class="score-item"><label>Creativity</label><input id="creativity" disabled /></div>
-        <div class="score-item"><label>Usefulness</label><input id="usefulness" disabled /></div>
-        <div class="score-item"><label>Quality Score</label><input id="quality_score" disabled /></div>
-      </div>
-
-      <h2 style="margin-top:32px;color:#ff3b30;">Danger Zone</h2>
-      <button id="deleteBtn" class="btn-danger">Delete</button>
-    </aside>
-
   </div>
 
-  <!-- FOOTER -->
-  <footer class="sticky-footer">
-    <button id="saveBtn" class="btn-primary">Save Changes</button>
-    <button id="duplicateBtn" class="btn-secondary">Duplicate</button>
-  </footer>
-
-  <!-- TOAST -->
-  <div id="toast" class="toast"></div>
-
-  <!-- IMPROVE MODAL -->
-  <div id="improveModal" class="improve-modal">
-    <div class="improve-modal-content">
-      <h2>Improve Text</h2>
-      <label class="form-label">Original</label>
-      <textarea id="diffOriginal" class="input-textarea" rows="6"></textarea>
-      <label class="form-label" style="margin-top:16px;">Improved</label>
-      <textarea id="diffImproved" class="input-textarea" rows="6"></textarea>
-
-      <div class="modal-actions">
-        <button id="btnCancelImproved" class="btn-secondary">Cancel</button>
-        <button id="btnAcceptImproved" class="btn-primary">Apply</button>
-        <button id="btnCloseImproveModal" class="modal-close">×</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- GLOBAL LOADING OVERLAY -->
-<div id="loadingOverlay" class="loading-overlay">
-  <div class="loading-spinner"></div>
-</div>
-
-  <!-- ======================================================
-       GLOBAL SCRIPTS (THESE FIX EVERYTHING)
-  ====================================================== -->
-<!-- 1 — Supabase UMD -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
-
-<!-- 2 — Global Supabase client -->
-<script src="/global-supabase.js"></script>
-
-<!-- 3 — Global Loading Overlay -->
-<script src="/loading-overlay.js"></script>
-
-<!-- 4 — Global Toast -->
-<script>
-  window.toast = function (msg) {
-    const t = document.getElementById("toast");
-    if (!t) return;
-    t.textContent = msg;
-    t.classList.add("toast-visible");
-    setTimeout(() => t.classList.remove("toast-visible"), 2000);
-  };
-</script>
-
-<!-- 5 — Module scripts (must load LAST) -->
-<script type="module" src="./options.js"></script>
-<script type="module" src="./modal.js"></script>
-<script type="module" src="./admin-edit.js"></script>
-
-
-
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
+  <script src="/global-supabase.js"></script>
+  <script src="/loading-overlay.js"></script>
+  <script type="module" src="./options.js"></script>
+  <script type="module" src="./modal.js"></script>
+  <script type="module" src="./admin-edit.js"></script>
 </body>
 </html>

@@ -4,29 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Prompeii Admin — Prompt List</title>
-
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-
-  <!-- Tailwind -->
   <link rel="stylesheet" href="/css/tailwind.css" />
 </head>
-
 <body class="h-full bg-white text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100">
   <div class="min-h-dvh">
 
     <!-- Header -->
-    <header class="border-b border-gray-200 bg-white/70 backdrop-blur dark:border-gray-800 dark:bg-gray-950/70">
-      <div class="mx-auto max-w-7xl px-6 py-6 flex flex-wrap items-center justify-between gap-4">
+    <header class="sticky top-0 z-30 border-b border-gray-200 bg-white/80 backdrop-blur dark:border-gray-800 dark:bg-gray-950/75">
+      <div class="mx-auto max-w-7xl px-6 py-5 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">Prompeii Admin Console</h1>
+          <h1 class="text-[20px] font-semibold tracking-tight">Prompeii Admin Console</h1>
           <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage curated prompts and metadata.</p>
         </div>
-
         <div class="flex items-center gap-4">
           <span id="rowCount" class="text-sm text-gray-500 dark:text-gray-400">—</span>
-
           <a href="admin-create.html"
-             class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500">
+             class="inline-flex items-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-sm ring-1 ring-black/5 hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-white">
             + New Prompt
           </a>
         </div>
@@ -35,24 +29,16 @@
 
     <!-- Content -->
     <main class="mx-auto max-w-7xl px-6 py-8 space-y-6">
-
       <!-- Filters -->
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <input
-          id="searchInput"
-          type="text"
-          placeholder="Search smart title, tags, category…"
-          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm
-                 shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500
-                 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100"
-        />
-
-        <select
-          id="statusFilter"
-          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm
-                 shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500
-                 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100"
-        >
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <input id="searchInput" type="text" placeholder="Search smart title, tags, category…"
+               class="col-span-2 w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm shadow-sm outline-none
+                      focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10
+                      dark:border-gray-800 dark:bg-gray-900 dark:placeholder:text-gray-500" />
+        <select id="statusFilter"
+                class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm shadow-sm outline-none
+                       focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10
+                       dark:border-gray-800 dark:bg-gray-900">
           <option value="all">All Statuses</option>
           <option value="draft">Draft</option>
           <option value="curated">Curated</option>
@@ -61,10 +47,10 @@
       </div>
 
       <!-- Table -->
-      <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
-        <table class="w-full text-left text-sm border-collapse">
-          <thead class="bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
-            <tr class="text-sm font-medium">
+      <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+            <tr class="font-medium">
               <th data-sort="smart_title" class="cursor-pointer px-4 py-3">Smart Title</th>
               <th data-sort="category" class="cursor-pointer px-4 py-3">Category</th>
               <th data-sort="status" class="cursor-pointer px-4 py-3">Status</th>
@@ -72,23 +58,16 @@
               <th class="px-4 py-3">Actions</th>
             </tr>
           </thead>
-
           <tbody id="tableBody" class="divide-y divide-gray-200 dark:divide-gray-800">
-            <!-- Rows injected by admin.js -->
+            <!-- rows injected by admin.js -->
           </tbody>
         </table>
-
-        <div id="emptyState" class="hidden p-6 text-center text-gray-500 dark:text-gray-400">
-          No prompts found.
-        </div>
+        <div id="emptyState" class="hidden p-6 text-center text-gray-500 dark:text-gray-400">No prompts found.</div>
       </div>
-
     </main>
 
     <!-- Toast -->
-    <div id="toast"
-         class="fixed inset-x-0 bottom-4 mx-auto w-fit rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-lg hidden">
-    </div>
+    <div id="toast" class="fixed inset-x-0 bottom-4 mx-auto w-fit rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-lg hidden"></div>
 
     <!-- Loading overlay -->
     <div id="loadingOverlay" class="pointer-events-none fixed inset-0 z-50 hidden items-center justify-center bg-black/30">
@@ -96,19 +75,11 @@
     </div>
   </div>
 
-  <!-- JS (ORDER MATTERS) -->
-
-  <!-- 1 — Supabase SDK -->
+  <!-- JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
-
-  <!-- 2 — Global Supabase client (must run BEFORE any admin scripts) -->
   <script src="/global-supabase.js"></script>
-
-  <!-- 3 — Overlay -->
   <script src="/loading-overlay.js"></script>
-
-  <!-- 4 — Admin logic (MUST be module for imports + proper execution) -->
-  <script type="module" src="./admin.js"></script>
-
+  <script src="./admin.js"></script>
 </body>
 </html>
+
